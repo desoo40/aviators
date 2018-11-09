@@ -1,0 +1,524 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Drawing;
+using System.Text;
+using System.Threading.Tasks;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+using System.Drawing.Imaging;
+
+namespace StandingsGen
+{
+    class Program
+    {
+        static int pointPerWinInMainTime = 0;
+        static int pointPerWinAfterMainTime = 0;
+        static int pointPerLoseAfterMainTime = 0;
+        static int pointPerDraw = 0;
+        static int gamesBetween = 0;
+
+        static List<Team> teams = null;
+        static Dictionary<string, int> DictIndTeamByName = null;
+        static Dictionary<int, string> DictNameTeamByInd = null;
+        static int currInd = 0;
+
+        static List<List<List<Score>>> games = new List<List<List<Score>>>();
+
+        static void Main(string[] args)
+        {
+            teams = new List<Team>();
+            DictIndTeamByName = new Dictionary<string, int>();
+            DictNameTeamByInd = new Dictionary<int, string>();
+
+            var file = "НХЛ2018";
+            ReadFile(file);
+
+            SortStandings();
+            //PrintStandingsWithoutScores();
+            //PrintScores();
+
+            CreateBackground();
+
+            //int i = 0;
+
+            //foreach (var el in indTeam)
+            //{
+            //    Console.WriteLine(indTeam[teams[0]]);
+            //    ++i;
+            //}
+
+            //CreateGamesMatrix(file);
+        }
+
+        private static Rectangle GetInscribed(Rectangle baseRect, Size inputsize)
+        {
+            Rectangle resRect = baseRect;
+
+            //соотношение сторон
+            float ratio = inputsize.Width / (float)inputsize.Height;
+
+            int height = baseRect.Height;
+            int width = (int)(height * ratio);
+
+            if (width > baseRect.Width)
+            {
+                width = baseRect.Width;
+                height = (int)(width / ratio);
+            }
+
+            var x = baseRect.X + baseRect.Width / 2 - width / 2;
+            var y = baseRect.Y + baseRect.Height / 2 - height / 2;
+
+            resRect = new Rectangle(x, y, width, height);
+
+            return resRect;
+        }
+        private static void CreateBackground()
+        {
+            int lowerMagrin = 80;
+            int upperMagrin = 160;
+            int sidesMargin = 20;
+
+            int teamNameWidht = 230;
+            int hatHight = 60;
+            int rowHeight = 100;
+
+            int scoreWidth = 100;
+            int attributsWidht = 80;
+            int pucksDiffWidht = 150;
+            int reglamentSett = 6;
+
+            int teamsCnt = teams.Count;
+
+
+            int bmpWidth = 2 * sidesMargin + teamNameWidht + scoreWidth * teamsCnt + attributsWidht * reglamentSett + pucksDiffWidht;
+            int bmpHeight = upperMagrin + lowerMagrin + hatHight + rowHeight * teamsCnt;
+
+
+            Image bitmap = new Bitmap(bmpWidth, bmpHeight);
+            Image img1 = Image.FromFile("images//winter.png");
+            Image img2 = Image.FromFile("images//layer.png");
+
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                var h = GetInscribed(new Rectangle(0, 0, bmpWidth, bmpHeight), new Size(bmpWidth, bmpHeight));
+                var v = GetInscribed(new Rectangle(0, 0, bmpWidth, bmpHeight), new Size(bmpWidth, bmpHeight));
+
+                //var a = GetInscribed(AwayTeamLogo.Position, AwayTeamLogo.Image.Size);
+                //var m = GetInscribed(MshlLogo.Position, MshlLogo.Image.Size);
+
+                var color = ColorTranslator.FromHtml("#e0e6ea");
+                var rectCol = ColorTranslator.FromHtml("#00337f");
+
+                var rct = new Rectangle(250, 25, 1100, 110);
+                var br = new LinearGradientBrush(new Point(0, rct.Y),
+                                                 new Point(0, rct.Y + rct.Height / 2),
+                                                 ColorTranslator.FromHtml("#f1f1f1"),
+                                                 ColorTranslator.FromHtml("#ffffff"));
+
+                SolidBrush b = new SolidBrush(color);
+                SolidBrush rectB = new SolidBrush(rectCol);
+
+                g.DrawImage(img2, v);
+                g.FillRectangle(b, 0, upperMagrin, bmpWidth, bmpHeight - upperMagrin - lowerMagrin);
+                g.DrawImage(img1, h);
+
+                for (int i = 0; i < teamsCnt + 1; ++i)
+                {
+                    //g.DrawRectangle(new Pen(rectCol, 1), 4, 220 + i * 100, 1592, 4);
+                    g.FillRectangle(rectB,               4, 220 + i * 100, bmpWidth - 2 * 2, 4);
+                }
+
+                g.FillRectangle(rectB, 250, 221, 4, bmpHeight - upperMagrin - lowerMagrin - hatHight);
+
+                for (int i = 0; i < teamsCnt; ++i)
+                {
+                    for (int j = 0; j < teamsCnt; ++j)
+                    {
+                        g.FillRectangle(rectB, 350 + i * 100, 230 + j * 100, 3, 80);
+                    }
+                }
+
+                
+
+                PrivateFontCollection coll = new PrivateFontCollection();
+
+                coll.AddFontFile("fonts//FiraSans-SemiBold.ttf");
+                var f = new Font(coll.Families[0], 20);
+
+                var centerFormat = new StringFormat();
+                var leftFormat = new StringFormat();
+                var rightFormat = new StringFormat();
+
+                centerFormat.Alignment = StringAlignment.Center;
+                centerFormat.LineAlignment = StringAlignment.Center;
+
+                leftFormat.Alignment = StringAlignment.Near;
+                leftFormat.LineAlignment = StringAlignment.Near;
+
+                rightFormat.Alignment = StringAlignment.Far;
+                rightFormat.LineAlignment = StringAlignment.Far;
+
+                g.DrawString("МАГИСТР", f, br, rct, centerFormat);
+
+
+                for (int i = 0; i < teamsCnt; ++i)
+                {
+                    var name = teams[i].name;
+                    //Image teamLogo = Image.FromFile($"teams//{name}.png");
+
+                    int inBoxMarginForLogo = 13;
+                    int sizeOfLogo = 80;
+
+                    var pos = new Rectangle(sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100,
+                                            upperMagrin + hatHight + inBoxMarginForLogo + i * 100,
+                                            sizeOfLogo, sizeOfLogo);
+
+                    //var kkk = GetInscribed(pos, teamLogo.Size);
+
+                    g.DrawString(name, f, br, sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100, upperMagrin + hatHight + inBoxMarginForLogo + i * 100);
+
+                }
+
+
+                //g.DrawImage(AwayTeamLogo.Image, a);
+                //g.DrawImage(MshlLogo.Image, m);
+
+                //g.DrawString(Division.Text, Division.Font, Division.Gradient, Division.Position, Division.StrFormatting);
+                //g.DrawString("MSHLIVE.RU", Mshl.Font, Mshl.Gradient, Mshl.Position, Mshl.StrFormatting);
+
+                //g.DrawString(HomeTeam.Text, HomeTeam.Font, HomeTeam.Gradient, HomeTeam.Position, HomeTeam.StrFormatting);
+                //g.DrawString(AwayTeam.Text, AwayTeam.Font, AwayTeam.Gradient, AwayTeam.Position, AwayTeam.StrFormatting);
+                //g.DrawString(HomeLower.Text, HomeLower.Font, HomeLower.Gradient, HomeLower.Position, HomeLower.StrFormatting);
+                //g.DrawString(AwayLower.Text, AwayLower.Font, AwayLower.Gradient, AwayLower.Position, AwayLower.StrFormatting);
+                //g.DrawString(Score.Text, Score.Font, Score.Gradient, Score.Position, Score.StrFormatting);
+                //g.DrawString(ScorePeriods.Text, ScorePeriods.Font, ScorePeriods.Gradient, ScorePeriods.Position, ScorePeriods.StrFormatting);
+                //g.DrawString(Date.Text, Date.Font, Date.Gradient, Date.Position, Date.StrFormatting);
+
+                //g.DrawRectangle(Pens.Red, Division.Position);
+                //g.DrawRectangle(Pens.Red, AwayTeam.Position);
+                //g.DrawRectangle(Pens.Red, HomeTeam.Position);
+                //g.DrawRectangle(Pens.Red, Score.Position);
+                //g.DrawRectangle(Pens.Red, ScorePeriods.Position);
+                //g.DrawRectangle(Pens.Red, Date.Position);
+                //g.DrawRectangle(Pens.Red, Mshl.Position);
+                //g.DrawRectangle(Pens.Red, h);
+                //g.DrawRectangle(Pens.Red, a);
+                //g.DrawRectangle(Pens.Red, m);
+            }
+
+
+
+            var file = $"kek.png";
+
+            EncoderParameters myEncoderParameters = new EncoderParameters(1);
+            System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+            EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 100L);
+            myEncoderParameters.Param[0] = myEncoderParameter;
+
+            ImageCodecInfo pngEncoder = GetEncoder(ImageFormat.Png);
+
+            bitmap.Save(file, pngEncoder, myEncoderParameters);
+            Console.WriteLine("Сохранил!\n");
+        }
+
+        private static ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
+
+        private static void PrintScores()
+        {
+            for (int i = 0; i < games.Count; ++i)
+            {
+                Console.WriteLine($"******************************");
+                Console.WriteLine($"{DictNameTeamByInd[i]} против");
+
+                for (int j = 0; j < games.Count; ++j)
+                {
+                    Console.WriteLine($"-----------------------------");
+                    Console.WriteLine($"{DictNameTeamByInd[j]}");
+
+                    var gamesBetweenTeams = games[i][j].Count;
+
+                    if (gamesBetweenTeams == 0)
+                    {
+                        Console.WriteLine($"еще не играли");
+                        continue;
+                    }
+
+                    for (int k = 0; k < gamesBetweenTeams; ++k)
+                    {
+                        var ot = "";
+
+                        if (games[i][j][k].IsOt > 0)
+                        {
+                            ot = games[i][j][k].IsOt == 1 ? "OT" : "Pen";
+                        }
+
+                        Console.WriteLine($"{games[i][j][k].HomeTeamGoals} - {games[i][j][k].AwayTeamGoals} {ot}");
+                    }
+                }
+            }
+        }
+
+        private static void PrintStandingsWithoutScores()
+        {
+            Console.WriteLine(String.Format("|{0,5}|{1,15}|{2,4}|{3,4}|{4,4}|{5,4}|{6,4}|{7,4}|{8,4}|{9,4}|{10,4}|",
+                                            "PLACE", "TEAM", "GP", "W", "OTW", "L", "OTL", "GF", "GA", "Diff", "Pts"));
+            int i = 0;
+            foreach (var el in teams)
+            {
+                ++i;
+
+                Console.WriteLine(String.Format("|{0,5}|{1,15}|{2,4}|{3,4}|{4,4}|{5,4}|{6,4}|{7,4}|{8,4}|{9,4}|{10,4}|",
+                                           i, el.name, el.games, el.wins, el.winsOT + el.winsPen,
+                                           el.loses, el.loseOT + el.losePen,
+                                           el.goalsFor, el.goalsAgainst, el.diff,
+                                           el.points));
+            }
+        }
+
+        private static void CreateGamesMatrix(string v)
+        {
+            var lines = File.ReadAllLines(v).ToList();
+
+            for (int i = 5; i < lines.Count; ++i)
+            {
+                ParseGameClass(lines[i]);
+            }
+        }
+
+        private static void ParseGameClass(string v)
+        {
+            v = v.Replace(" ", "");
+            var game = v.Split(';').ToList();
+
+            int otOrPen = 0;
+
+            string homeTeamName = game[0];
+            string awayTeamName = game[1];
+
+            int homeTeamGoals = Convert.ToInt32(game[2]);
+            int awayTeamGoals = Convert.ToInt32(game[3]);
+
+            if (game.Count == 5)
+            {
+                if (game[4].ToLower() == "от")
+                    otOrPen = 1;
+
+                if (game[4].ToLower() == "б")
+                    otOrPen = 2;
+            }
+        }
+
+        private static void SortStandings()
+        {
+            //teams.Sort(delegate (Team us1, Team us2)
+            //{ return us1.games.CompareTo(us2.games); });
+
+            //PrintStandingsWithoutScores();
+
+            var kek = (from m in teams
+                                        orderby -m.points, - m.diff, m.games
+                                        select m).ToList();
+
+            teams = kek;
+
+            //teams.Sort(delegate (Team us2, Team us1)
+            //{ return us2.diff.CompareTo(us1.diff); });
+
+            //PrintStandingsWithoutScores();
+
+
+            //teams.Sort(delegate (Team us2, Team us1)
+            //{ return us1.points.CompareTo(us2.points); });
+
+            PrintStandingsWithoutScores();
+
+        }
+
+        private static void ReadFile(string v)
+        {
+            var lines = File.ReadAllLines(v).ToList();
+
+            gamesBetween = Convert.ToInt32(lines[0]);
+            pointPerDraw = Convert.ToInt32(lines[1]);
+            pointPerWinInMainTime = Convert.ToInt32(lines[2]);
+            pointPerWinAfterMainTime = Convert.ToInt32(lines[3]);
+            pointPerLoseAfterMainTime = Convert.ToInt32(lines[4]);
+
+            for(int i = 5; i < lines.Count; ++i)
+            {
+                ParseGame(lines[i]);
+            }
+        }
+
+        private static void ParseGame(string v)
+        {
+            v = v.Replace(" ", "");
+            var game = v.Split(';').ToList();
+
+            int otOrPen = 0;
+
+            string homeTeamName = game[0];
+            string awayTeamName = game[1];
+
+            int homeTeamGoals = Convert.ToInt32(game[2]);
+            int awayTeamGoals = Convert.ToInt32(game[3]);
+
+            if (game.Count == 5)
+            {
+                if (game[4].ToLower() == "от")
+                    otOrPen = 1;
+                
+                if (game[4].ToLower() == "б")
+                    otOrPen = 2;
+            }
+
+            if (homeTeamGoals > awayTeamGoals)
+            {
+                WinsUpd(homeTeamName, homeTeamGoals, awayTeamGoals, otOrPen);
+                LoseUpd(awayTeamName, awayTeamGoals, homeTeamGoals, otOrPen);
+            }
+
+            else
+            {
+                LoseUpd(homeTeamName, homeTeamGoals, awayTeamGoals, otOrPen);
+                WinsUpd(awayTeamName, awayTeamGoals, homeTeamGoals, otOrPen);
+            }
+
+            AddGameToMatrix(homeTeamName, awayTeamName, homeTeamGoals, awayTeamGoals, otOrPen);
+
+        }
+
+        private static void AddGameToMatrix(string homeTeamName, string awayTeamName, int homeTeamGoals, int awayTeamGoals, int otOrPen)
+        {
+            var scoreForHome = new Score(homeTeamGoals, awayTeamGoals, otOrPen);
+            var scoreForAway = new Score(awayTeamGoals, homeTeamGoals, otOrPen);
+
+            int indOfHome = DictIndTeamByName[homeTeamName];
+            int indOfAway = DictIndTeamByName[awayTeamName];
+
+            int maxInd = indOfHome > indOfAway ? indOfHome : indOfAway;
+
+            if (games.Count < maxInd + 1)
+                UpdGamesMesuare(maxInd);
+
+            games[indOfHome][indOfAway].Add(scoreForHome);
+            games[indOfAway][indOfHome].Add(scoreForAway);
+
+
+        }
+
+        private static void UpdGamesMesuare(int maxInd)
+        {
+            while (games.Count < maxInd + 1)
+            {
+                games.Add(new List<List<Score>>());
+
+                for (int i = 0; i < games.Count; ++i)
+                {
+                    while (games[i].Count < maxInd + 1)
+                        games[i].Add(new List<Score>());
+                }
+            }
+        }
+
+        private static void LoseUpd(string awayTeamName, int awayTeamGoals, int homeTeamGoals, int otOrPen)
+        {
+            var team = teams.Find(x => x.name.Contains(awayTeamName));
+
+            if (team == null)
+            {
+                team = new Team(awayTeamName);
+                DictUpdate(team);
+            } 
+            else
+                teams.Remove(team);
+
+            ++team.games;
+
+            if (otOrPen == 0)
+                ++team.loses;
+
+            if (otOrPen == 1)
+            {
+                ++team.loseOT;
+                team.points += pointPerLoseAfterMainTime;
+            }
+
+            if (otOrPen == 2)
+            {
+                ++team.losePen ;
+                team.points += pointPerLoseAfterMainTime;
+            }
+
+            team.goalsFor += awayTeamGoals;
+            team.goalsAgainst += homeTeamGoals;
+
+            teams.Add(team);
+        }
+
+        private static void DictUpdate(Team team)
+        {
+            DictIndTeamByName.Add(team.name, currInd);
+            DictNameTeamByInd.Add(currInd, team.name);
+            ++currInd;
+        }
+
+        private static void WinsUpd(string homeTeamName, int homeTeamGoals, int awayTeamGoals, int otOrPen)
+        {
+            var team = teams.Find(x => x.name.Contains(homeTeamName));
+
+            if (team == null)
+            {
+                team = new Team(homeTeamName);
+                DictUpdate(team);
+            }
+            else
+                teams.Remove(team);
+
+            ++team.games;
+
+            if (otOrPen == 0)
+            {
+                ++team.wins;
+                team.points += pointPerWinInMainTime;
+            }
+
+            if (otOrPen == 1)
+            {
+                ++team.winsOT;
+                team.points += pointPerWinAfterMainTime;
+            }
+
+            if (otOrPen == 2)
+            {
+                ++team.winsPen;
+                team.points += pointPerWinAfterMainTime;
+            }
+
+            team.goalsFor += homeTeamGoals;
+            team.goalsAgainst += awayTeamGoals;
+
+            teams.Add(team);
+        }
+    }
+}
