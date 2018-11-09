@@ -43,9 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Format.cs" />
+    <Compile Include="TextHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Score.cs" />
+    <Compile Include="FullName.cs" />
     <Compile Include="Team.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -104,15 +107,24 @@
     <None Include="Fonts\FiraSans-ThinItalic.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="МСХЛ2018">
+    <None Include="Tournaments\МСХЛ2018">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="СХЛ2018">
+    <None Include="Tournaments\НХЛ2018">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Tournaments\СХЛ2018">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Tournaments\ТХЛ2018">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Fonts\2010.png" />
+    <Content Include="Images\#borntofly.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Teams\UKPRAHA.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

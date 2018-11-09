@@ -5,8 +5,6 @@ E:\Проги\git\aviators\StandingsGen\StandingsGen\obj\Debug\StandingsGen.cspr
 E:\Проги\git\aviators\StandingsGen\StandingsGen\obj\Debug\StandingsGen.csproj.CoreCompileInputs.cache
 E:\Проги\git\aviators\StandingsGen\StandingsGen\obj\Debug\StandingsGen.exe
 E:\Проги\git\aviators\StandingsGen\StandingsGen\obj\Debug\StandingsGen.pdb
-E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\СХЛ2018
-E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\МСХЛ2018
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Images\layer.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Images\winter.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Fonts\FiraSans-Black.ttf
@@ -80,3 +78,8 @@ E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\маи.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\гцолифк.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\бифк.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\вгту.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\МСХЛ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\НХЛ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\СХЛ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\ТХЛ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Images\#borntofly.png

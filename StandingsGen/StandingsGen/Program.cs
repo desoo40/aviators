@@ -22,6 +22,7 @@ namespace StandingsGen
         static List<Team> teams = null;
         static Dictionary<string, int> DictIndTeamByName = null;
         static Dictionary<int, string> DictNameTeamByInd = null;
+        static Dictionary<string, FullName> DictFullName = null;
         static int currInd = 0;
 
         static List<List<List<Score>>> games = new List<List<List<Score>>>();
@@ -31,27 +32,152 @@ namespace StandingsGen
             teams = new List<Team>();
             DictIndTeamByName = new Dictionary<string, int>();
             DictNameTeamByInd = new Dictionary<int, string>();
+            DictFullName = new Dictionary<string, FullName>();
 
-            var file = "НХЛ2018";
+
+            var file = "tournaments//МСХЛ2018";
             ReadFile(file);
 
             SortStandings();
-            //PrintStandingsWithoutScores();
-            //PrintScores();
+            PrintStandingsWithoutScores();
+            PrintScores();
 
-            CreateBackground();
-
-            //int i = 0;
-
-            //foreach (var el in indTeam)
-            //{
-            //    Console.WriteLine(indTeam[teams[0]]);
-            //    ++i;
-            //}
-
-            //CreateGamesMatrix(file);
+            DrawingTable();
         }
 
+        private static void DrawingTable()
+        {
+            int lowerMagrin = 80;
+            int upperMagrin = 160;
+            int sidesMargin = 20;
+
+            int hatHight = 60;
+            int rowHeight = 100;
+
+            int teamNameWidht = 230;
+            int scoreWidth = 100;
+            int attributsWidht = 80;
+            int pucksDiffWidht = 150;
+
+            int reglamentSett = 6;
+            int teamsCnt = teams.Count;
+
+            int bmpWidth = 2 * sidesMargin + teamNameWidht + scoreWidth * teamsCnt + attributsWidht * reglamentSett + pucksDiffWidht;
+            int bmpHeight = upperMagrin + lowerMagrin + hatHight + rowHeight * teamsCnt;
+            
+            Image bitmap = new Bitmap(bmpWidth, bmpHeight);
+
+            Image imgLayer = Image.FromFile("images//layer.png");
+            Image imgWinte = Image.FromFile("images//winter.png");
+            Image imgBorn  = Image.FromFile("images//#borntofly.png");
+
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.SmoothingMode = SmoothingMode.HighQuality;
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+                var imgCut= GetInscribed(new Rectangle(0, 0, bmpWidth, bmpHeight), new Size(bmpWidth, bmpHeight));
+
+                var colorTableBckgr = ColorTranslator.FromHtml("#e0e6ea");
+                var color = ColorTranslator.FromHtml("#00337f");
+
+                var b = new SolidBrush(color);
+                var rectB = new SolidBrush(rectCol);
+
+                g.DrawImage(img2, v);
+                g.FillRectangle(b, 0, upperMagrin, bmpWidth, bmpHeight - upperMagrin - lowerMagrin);
+                g.DrawImage(img1, h);
+
+                var nameTableRect = new Rectangle(250, 25, 1100, 110);
+
+                var brushWhite = new LinearGradientBrush(new Point(0, nameTableRect.Y),
+                                                         new Point(0, nameTableRect.Y + nameTableRect.Height / 2),
+                                                         ColorTranslator.FromHtml("#f1f1f1"),
+                                                         ColorTranslator.FromHtml("#ffffff"));
+
+                var brushBlue = new LinearGradientBrush(new Point(0, upperMagrin),
+                                                        new Point(0, upperMagrin + hatHight / 2),
+                                                        ColorTranslator.FromHtml("#00337f"),
+                                                        ColorTranslator.FromHtml("#0041a1"));
+
+                PrivateFontCollection coll = new PrivateFontCollection();
+
+                coll.AddFontFile("fonts//FiraSans-SemiBold.ttf");
+                var f = new Font(coll.Families[0], 100);
+
+                var fmt = new Format();
+                var centerFormat = fmt.centerFormat;
+
+                g.DrawString("МАГИСТР", f, brushWhite, nameTableRect, centerFormat);
+
+               
+
+                for (int i = 0; i < teamsCnt + 1; ++i)
+                {
+                    //g.DrawRectangle(new Pen(rectCol, 1), 4, 220 + i * 100, 1592, 4);
+                    g.FillRectangle(rectB, 4, 220 + i * 100, bmpWidth - 2 * 4, 4);
+                }
+
+                g.FillRectangle(rectB, 250, 221, 4, bmpHeight - upperMagrin - lowerMagrin - hatHight);
+
+                for (int i = 0; i < teamsCnt; ++i)
+                {
+                    for (int j = 0; j < teamsCnt; ++j)
+                    {
+                        g.FillRectangle(rectB, 350 + i * 100, 230 + j * 100, 3, 80);
+                    }
+                }
+
+
+                for (int i = 0; i < teamsCnt; ++i)
+                {
+                    var name = teams[i].name;
+                    Image teamLogo = Image.FromFile($"teams//{name}.png");
+
+                    int inBoxMarginForLogo = 13;
+                    int sizeOfLogo = 80;
+
+                    var pos = new Rectangle(sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100,
+                                            upperMagrin + hatHight + inBoxMarginForLogo + i * 100,
+                                            sizeOfLogo, sizeOfLogo);
+
+                    var kkk = GetInscribed(pos, teamLogo.Size);
+
+                    g.DrawImage(teamLogo, kkk);
+                    //g.DrawString(name, f, br, sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100, upperMagrin + hatHight + inBoxMarginForLogo + i * 100);
+
+                }
+
+                coll.AddFontFile("fonts//FiraSans-ExtraBold.ttf");
+                var hatF = new Font(coll.Families[0], 35);
+
+                for (int i = 0; i < teamsCnt; ++i)
+                {
+                    int startPos = sidesMargin + teamNameWidht;
+                    
+                    var rect = new Rectangle(startPos + i * scoreWidth, upperMagrin + 5, scoreWidth, hatHight);
+
+                    g.DrawString((i + 1).ToString(), hatF, brushBlue, rect, centerFormat);
+                }
+            }
+
+
+
+            var file = $"kek.png";
+
+            EncoderParameters myEncoderParameters = new EncoderParameters(1);
+            System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
+            EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 100L);
+            myEncoderParameters.Param[0] = myEncoderParameter;
+
+            ImageCodecInfo pngEncoder = GetEncoder(ImageFormat.Png);
+
+            bitmap.Save(file, pngEncoder, myEncoderParameters);
+            Console.WriteLine("Сохранил!\n");
+        }
+
+        #region DrawingHelp
         private static Rectangle GetInscribed(Rectangle baseRect, Size inputsize)
         {
             Rectangle resRect = baseRect;
@@ -75,158 +201,6 @@ namespace StandingsGen
 
             return resRect;
         }
-        private static void CreateBackground()
-        {
-            int lowerMagrin = 80;
-            int upperMagrin = 160;
-            int sidesMargin = 20;
-
-            int teamNameWidht = 230;
-            int hatHight = 60;
-            int rowHeight = 100;
-
-            int scoreWidth = 100;
-            int attributsWidht = 80;
-            int pucksDiffWidht = 150;
-            int reglamentSett = 6;
-
-            int teamsCnt = teams.Count;
-
-
-            int bmpWidth = 2 * sidesMargin + teamNameWidht + scoreWidth * teamsCnt + attributsWidht * reglamentSett + pucksDiffWidht;
-            int bmpHeight = upperMagrin + lowerMagrin + hatHight + rowHeight * teamsCnt;
-
-
-            Image bitmap = new Bitmap(bmpWidth, bmpHeight);
-            Image img1 = Image.FromFile("images//winter.png");
-            Image img2 = Image.FromFile("images//layer.png");
-
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                g.SmoothingMode = SmoothingMode.AntiAlias;
-                g.TextRenderingHint = TextRenderingHint.AntiAlias;
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-                var h = GetInscribed(new Rectangle(0, 0, bmpWidth, bmpHeight), new Size(bmpWidth, bmpHeight));
-                var v = GetInscribed(new Rectangle(0, 0, bmpWidth, bmpHeight), new Size(bmpWidth, bmpHeight));
-
-                //var a = GetInscribed(AwayTeamLogo.Position, AwayTeamLogo.Image.Size);
-                //var m = GetInscribed(MshlLogo.Position, MshlLogo.Image.Size);
-
-                var color = ColorTranslator.FromHtml("#e0e6ea");
-                var rectCol = ColorTranslator.FromHtml("#00337f");
-
-                var rct = new Rectangle(250, 25, 1100, 110);
-                var br = new LinearGradientBrush(new Point(0, rct.Y),
-                                                 new Point(0, rct.Y + rct.Height / 2),
-                                                 ColorTranslator.FromHtml("#f1f1f1"),
-                                                 ColorTranslator.FromHtml("#ffffff"));
-
-                SolidBrush b = new SolidBrush(color);
-                SolidBrush rectB = new SolidBrush(rectCol);
-
-                g.DrawImage(img2, v);
-                g.FillRectangle(b, 0, upperMagrin, bmpWidth, bmpHeight - upperMagrin - lowerMagrin);
-                g.DrawImage(img1, h);
-
-                for (int i = 0; i < teamsCnt + 1; ++i)
-                {
-                    //g.DrawRectangle(new Pen(rectCol, 1), 4, 220 + i * 100, 1592, 4);
-                    g.FillRectangle(rectB,               4, 220 + i * 100, bmpWidth - 2 * 2, 4);
-                }
-
-                g.FillRectangle(rectB, 250, 221, 4, bmpHeight - upperMagrin - lowerMagrin - hatHight);
-
-                for (int i = 0; i < teamsCnt; ++i)
-                {
-                    for (int j = 0; j < teamsCnt; ++j)
-                    {
-                        g.FillRectangle(rectB, 350 + i * 100, 230 + j * 100, 3, 80);
-                    }
-                }
-
-                
-
-                PrivateFontCollection coll = new PrivateFontCollection();
-
-                coll.AddFontFile("fonts//FiraSans-SemiBold.ttf");
-                var f = new Font(coll.Families[0], 20);
-
-                var centerFormat = new StringFormat();
-                var leftFormat = new StringFormat();
-                var rightFormat = new StringFormat();
-
-                centerFormat.Alignment = StringAlignment.Center;
-                centerFormat.LineAlignment = StringAlignment.Center;
-
-                leftFormat.Alignment = StringAlignment.Near;
-                leftFormat.LineAlignment = StringAlignment.Near;
-
-                rightFormat.Alignment = StringAlignment.Far;
-                rightFormat.LineAlignment = StringAlignment.Far;
-
-                g.DrawString("МАГИСТР", f, br, rct, centerFormat);
-
-
-                for (int i = 0; i < teamsCnt; ++i)
-                {
-                    var name = teams[i].name;
-                    //Image teamLogo = Image.FromFile($"teams//{name}.png");
-
-                    int inBoxMarginForLogo = 13;
-                    int sizeOfLogo = 80;
-
-                    var pos = new Rectangle(sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100,
-                                            upperMagrin + hatHight + inBoxMarginForLogo + i * 100,
-                                            sizeOfLogo, sizeOfLogo);
-
-                    //var kkk = GetInscribed(pos, teamLogo.Size);
-
-                    g.DrawString(name, f, br, sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100, upperMagrin + hatHight + inBoxMarginForLogo + i * 100);
-
-                }
-
-
-                //g.DrawImage(AwayTeamLogo.Image, a);
-                //g.DrawImage(MshlLogo.Image, m);
-
-                //g.DrawString(Division.Text, Division.Font, Division.Gradient, Division.Position, Division.StrFormatting);
-                //g.DrawString("MSHLIVE.RU", Mshl.Font, Mshl.Gradient, Mshl.Position, Mshl.StrFormatting);
-
-                //g.DrawString(HomeTeam.Text, HomeTeam.Font, HomeTeam.Gradient, HomeTeam.Position, HomeTeam.StrFormatting);
-                //g.DrawString(AwayTeam.Text, AwayTeam.Font, AwayTeam.Gradient, AwayTeam.Position, AwayTeam.StrFormatting);
-                //g.DrawString(HomeLower.Text, HomeLower.Font, HomeLower.Gradient, HomeLower.Position, HomeLower.StrFormatting);
-                //g.DrawString(AwayLower.Text, AwayLower.Font, AwayLower.Gradient, AwayLower.Position, AwayLower.StrFormatting);
-                //g.DrawString(Score.Text, Score.Font, Score.Gradient, Score.Position, Score.StrFormatting);
-                //g.DrawString(ScorePeriods.Text, ScorePeriods.Font, ScorePeriods.Gradient, ScorePeriods.Position, ScorePeriods.StrFormatting);
-                //g.DrawString(Date.Text, Date.Font, Date.Gradient, Date.Position, Date.StrFormatting);
-
-                //g.DrawRectangle(Pens.Red, Division.Position);
-                //g.DrawRectangle(Pens.Red, AwayTeam.Position);
-                //g.DrawRectangle(Pens.Red, HomeTeam.Position);
-                //g.DrawRectangle(Pens.Red, Score.Position);
-                //g.DrawRectangle(Pens.Red, ScorePeriods.Position);
-                //g.DrawRectangle(Pens.Red, Date.Position);
-                //g.DrawRectangle(Pens.Red, Mshl.Position);
-                //g.DrawRectangle(Pens.Red, h);
-                //g.DrawRectangle(Pens.Red, a);
-                //g.DrawRectangle(Pens.Red, m);
-            }
-
-
-
-            var file = $"kek.png";
-
-            EncoderParameters myEncoderParameters = new EncoderParameters(1);
-            System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
-            EncoderParameter myEncoderParameter = new EncoderParameter(myEncoder, 100L);
-            myEncoderParameters.Param[0] = myEncoderParameter;
-
-            ImageCodecInfo pngEncoder = GetEncoder(ImageFormat.Png);
-
-            bitmap.Save(file, pngEncoder, myEncoderParameters);
-            Console.WriteLine("Сохранил!\n");
-        }
 
         private static ImageCodecInfo GetEncoder(ImageFormat format)
         {
@@ -242,7 +216,9 @@ namespace StandingsGen
             }
             return null;
         }
+        #endregion
 
+        #region ConsolePrinting
         private static void PrintScores()
         {
             for (int i = 0; i < games.Count; ++i)
@@ -294,66 +270,17 @@ namespace StandingsGen
                                            el.points));
             }
         }
-
-        private static void CreateGamesMatrix(string v)
-        {
-            var lines = File.ReadAllLines(v).ToList();
-
-            for (int i = 5; i < lines.Count; ++i)
-            {
-                ParseGameClass(lines[i]);
-            }
-        }
-
-        private static void ParseGameClass(string v)
-        {
-            v = v.Replace(" ", "");
-            var game = v.Split(';').ToList();
-
-            int otOrPen = 0;
-
-            string homeTeamName = game[0];
-            string awayTeamName = game[1];
-
-            int homeTeamGoals = Convert.ToInt32(game[2]);
-            int awayTeamGoals = Convert.ToInt32(game[3]);
-
-            if (game.Count == 5)
-            {
-                if (game[4].ToLower() == "от")
-                    otOrPen = 1;
-
-                if (game[4].ToLower() == "б")
-                    otOrPen = 2;
-            }
-        }
+        #endregion
 
         private static void SortStandings()
         {
-            //teams.Sort(delegate (Team us1, Team us2)
-            //{ return us1.games.CompareTo(us2.games); });
-
-            //PrintStandingsWithoutScores();
-
             var kek = (from m in teams
-                                        orderby -m.points, - m.diff, m.games
-                                        select m).ToList();
-
+                       orderby -m.points, -m.diff, m.games
+                       select m).ToList();
             teams = kek;
-
-            //teams.Sort(delegate (Team us2, Team us1)
-            //{ return us2.diff.CompareTo(us1.diff); });
-
-            //PrintStandingsWithoutScores();
-
-
-            //teams.Sort(delegate (Team us2, Team us1)
-            //{ return us1.points.CompareTo(us2.points); });
-
-            PrintStandingsWithoutScores();
-
         }
 
+        #region Parsing
         private static void ReadFile(string v)
         {
             var lines = File.ReadAllLines(v).ToList();
@@ -408,6 +335,9 @@ namespace StandingsGen
 
         }
 
+        #endregion
+
+        #region UpdatingData
         private static void AddGameToMatrix(string homeTeamName, string awayTeamName, int homeTeamGoals, int awayTeamGoals, int otOrPen)
         {
             var scoreForHome = new Score(homeTeamGoals, awayTeamGoals, otOrPen);
@@ -423,8 +353,6 @@ namespace StandingsGen
 
             games[indOfHome][indOfAway].Add(scoreForHome);
             games[indOfAway][indOfHome].Add(scoreForAway);
-
-
         }
 
         private static void UpdGamesMesuare(int maxInd)
@@ -439,6 +367,17 @@ namespace StandingsGen
                         games[i].Add(new List<Score>());
                 }
             }
+        }
+
+        private static void DictUpdate(Team team)
+        {
+            var full = TextHelper.FullNameFinder(team.name);
+
+            DictFullName.Add(team.name, full);
+            DictIndTeamByName.Add(team.name, currInd);
+            DictNameTeamByInd.Add(currInd, team.name);
+
+            ++currInd;
         }
 
         private static void LoseUpd(string awayTeamName, int awayTeamGoals, int homeTeamGoals, int otOrPen)
@@ -474,13 +413,6 @@ namespace StandingsGen
             team.goalsAgainst += homeTeamGoals;
 
             teams.Add(team);
-        }
-
-        private static void DictUpdate(Team team)
-        {
-            DictIndTeamByName.Add(team.name, currInd);
-            DictNameTeamByInd.Add(currInd, team.name);
-            ++currInd;
         }
 
         private static void WinsUpd(string homeTeamName, int homeTeamGoals, int awayTeamGoals, int otOrPen)
@@ -520,5 +452,6 @@ namespace StandingsGen
 
             teams.Add(team);
         }
+        #endregion
     }
 }
