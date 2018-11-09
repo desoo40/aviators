@@ -47,28 +47,29 @@ namespace StandingsGen
 
         private static void DrawingTable()
         {
-            int lowerMagrin = 80;
-            int upperMagrin = 160;
-            int sidesMargin = 20;
+            int marginLower = 80;
+            int marginUpper = 160;
+            int marginSides = 20;
+            int marginHorizontalLines = 4;
 
-            int hatHight = 60;
-            int rowHeight = 100;
+            int heightHat = 60;
+            int heightTableRow = 100;
 
-            int teamNameWidht = 230;
-            int scoreWidth = 100;
-            int attributsWidht = 80;
-            int pucksDiffWidht = 150;
+            int widhtTeamName = 230;
+            int widhtScore = 100;
+            int widthIndicator = 80;
+            int widthPucksDiff = 150;
 
             int reglamentSett = 6;
             int teamsCnt = teams.Count;
 
-            int bmpWidth = 2 * sidesMargin + teamNameWidht + scoreWidth * teamsCnt + attributsWidht * reglamentSett + pucksDiffWidht;
-            int bmpHeight = upperMagrin + lowerMagrin + hatHight + rowHeight * teamsCnt;
+            int widhtBitmap = 2 * marginSides + widhtTeamName + widhtScore * teamsCnt + widthIndicator * reglamentSett + widthPucksDiff;
+            int heightBitmap = marginUpper + marginLower + heightHat + heightTableRow * teamsCnt;
             
-            Image bitmap = new Bitmap(bmpWidth, bmpHeight);
+            Image bitmap = new Bitmap(widhtBitmap, heightBitmap);
 
             Image imgLayer = Image.FromFile("images//layer.png");
-            Image imgWinte = Image.FromFile("images//winter.png");
+            Image imgWinter = Image.FromFile("images//winter.png");
             Image imgBorn  = Image.FromFile("images//#borntofly.png");
 
             using (Graphics g = Graphics.FromImage(bitmap))
@@ -77,17 +78,19 @@ namespace StandingsGen
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                var imgCut= GetInscribed(new Rectangle(0, 0, bmpWidth, bmpHeight), new Size(bmpWidth, bmpHeight));
+                var imgCut= GetInscribed(new Rectangle(0, 0, widhtBitmap, heightBitmap), new Size(widhtBitmap, heightBitmap));
 
                 var colorTableBckgr = ColorTranslator.FromHtml("#e0e6ea");
-                var color = ColorTranslator.FromHtml("#00337f");
+                var colorLines = ColorTranslator.FromHtml("#00337f");
 
-                var b = new SolidBrush(color);
-                var rectB = new SolidBrush(rectCol);
+                var brushTableBckrg = new SolidBrush(colorTableBckgr);
+                var brushLines = new SolidBrush(colorLines);
 
-                g.DrawImage(img2, v);
-                g.FillRectangle(b, 0, upperMagrin, bmpWidth, bmpHeight - upperMagrin - lowerMagrin);
-                g.DrawImage(img1, h);
+                var rectBckgr = new Rectangle(0, marginUpper, widhtBitmap, heightBitmap - marginUpper - marginLower);
+
+                g.DrawImage(imgLayer, imgCut);
+                g.FillRectangle(brushTableBckrg, rectBckgr);
+                g.DrawImage(imgWinter, imgCut);
 
                 var nameTableRect = new Rectangle(250, 25, 1100, 110);
 
@@ -96,36 +99,39 @@ namespace StandingsGen
                                                          ColorTranslator.FromHtml("#f1f1f1"),
                                                          ColorTranslator.FromHtml("#ffffff"));
 
-                var brushBlue = new LinearGradientBrush(new Point(0, upperMagrin),
-                                                        new Point(0, upperMagrin + hatHight / 2),
+                var brushBlue = new LinearGradientBrush(new Point(0, marginUpper),
+                                                        new Point(0, marginUpper + heightHat / 2),
                                                         ColorTranslator.FromHtml("#00337f"),
                                                         ColorTranslator.FromHtml("#0041a1"));
 
-                PrivateFontCollection coll = new PrivateFontCollection();
+                PrivateFontCollection fontColl = new PrivateFontCollection();
 
-                coll.AddFontFile("fonts//FiraSans-SemiBold.ttf");
-                var f = new Font(coll.Families[0], 100);
+                fontColl.AddFontFile("fonts//FiraSans-SemiBold.ttf");
+                var sizeFontTableName = 100;
+                var fontTableName = new Font(fontColl.Families[0], sizeFontTableName);
 
                 var fmt = new Format();
                 var centerFormat = fmt.centerFormat;
 
-                g.DrawString("МАГИСТР", f, brushWhite, nameTableRect, centerFormat);
+                g.DrawString("МАГИСТР", fontTableName, brushWhite, nameTableRect, centerFormat);
 
                
 
                 for (int i = 0; i < teamsCnt + 1; ++i)
                 {
                     //g.DrawRectangle(new Pen(rectCol, 1), 4, 220 + i * 100, 1592, 4);
-                    g.FillRectangle(rectB, 4, 220 + i * 100, bmpWidth - 2 * 4, 4);
+                    g.FillRectangle(brushLines, marginHorizontalLines,
+                                    marginUpper + heightHat + i * heightTableRow,
+                                    widhtBitmap - 2 * marginHorizontalLines, 4);
                 }
 
-                g.FillRectangle(rectB, 250, 221, 4, bmpHeight - upperMagrin - lowerMagrin - hatHight);
+                g.FillRectangle(brushLines, 250, 221, 4, heightBitmap - marginUpper - marginLower - heightHat);
 
                 for (int i = 0; i < teamsCnt; ++i)
                 {
                     for (int j = 0; j < teamsCnt; ++j)
                     {
-                        g.FillRectangle(rectB, 350 + i * 100, 230 + j * 100, 3, 80);
+                        g.FillRectangle(brushLines, 350 + i * 100, 230 + j * 100, 3, 80);
                     }
                 }
 
@@ -138,8 +144,8 @@ namespace StandingsGen
                     int inBoxMarginForLogo = 13;
                     int sizeOfLogo = 80;
 
-                    var pos = new Rectangle(sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100,
-                                            upperMagrin + hatHight + inBoxMarginForLogo + i * 100,
+                    var pos = new Rectangle(marginSides + widhtTeamName + inBoxMarginForLogo + i * 100,
+                                            marginUpper + heightHat + inBoxMarginForLogo + i * 100,
                                             sizeOfLogo, sizeOfLogo);
 
                     var kkk = GetInscribed(pos, teamLogo.Size);
@@ -149,14 +155,14 @@ namespace StandingsGen
 
                 }
 
-                coll.AddFontFile("fonts//FiraSans-ExtraBold.ttf");
-                var hatF = new Font(coll.Families[0], 35);
+                fontColl.AddFontFile("fonts//FiraSans-ExtraBold.ttf");
+                var hatF = new Font(fontColl.Families[0], 35);
 
                 for (int i = 0; i < teamsCnt; ++i)
                 {
-                    int startPos = sidesMargin + teamNameWidht;
+                    int startPos = marginSides + widhtTeamName;
                     
-                    var rect = new Rectangle(startPos + i * scoreWidth, upperMagrin + 5, scoreWidth, hatHight);
+                    var rect = new Rectangle(startPos + i * widhtScore, marginUpper + 5, widhtScore, heightHat);
 
                     g.DrawString((i + 1).ToString(), hatF, brushBlue, rect, centerFormat);
                 }
@@ -164,7 +170,7 @@ namespace StandingsGen
 
 
 
-            var file = $"kek.png";
+            var file = "kek.png";
 
             EncoderParameters myEncoderParameters = new EncoderParameters(1);
             System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
@@ -274,10 +280,10 @@ namespace StandingsGen
 
         private static void SortStandings()
         {
-            var kek = (from m in teams
+            var tmpList = (from m in teams
                        orderby -m.points, -m.diff, m.games
                        select m).ToList();
-            teams = kek;
+            teams = tmpList;
         }
 
         #region Parsing
