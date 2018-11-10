@@ -20,6 +20,7 @@ namespace StandingsGen
         static int gamesBetween = 0;
 
         static List<Team> teams = null;
+        static string ligaName = "";
         static Dictionary<string, int> DictIndTeamByName = null;
         static Dictionary<int, string> DictNameTeamByInd = null;
         static Dictionary<string, FullName> DictFullName = null;
@@ -40,7 +41,49 @@ namespace StandingsGen
 
             SortStandings();
             PrintStandingsWithoutScores();
-            PrintScores();
+            //PrintScores();
+
+            DrawingTable();
+
+            teams = new List<Team>();
+            DictIndTeamByName = new Dictionary<string, int>();
+            DictNameTeamByInd = new Dictionary<int, string>();
+            DictFullName = new Dictionary<string, FullName>();
+
+            file = "tournaments//СХЛ2018";
+            ReadFile(file);
+
+            SortStandings();
+            PrintStandingsWithoutScores();
+            //PrintScores();
+
+            DrawingTable();
+
+            teams = new List<Team>();
+            DictIndTeamByName = new Dictionary<string, int>();
+            DictNameTeamByInd = new Dictionary<int, string>();
+            DictFullName = new Dictionary<string, FullName>();
+
+            //file = "tournaments//НХЛ2018";
+            //ReadFile(file);
+
+            //SortStandings();
+            //PrintStandingsWithoutScores();
+            ////PrintScores();
+
+            //DrawingTable();
+
+            //teams = new List<Team>();
+            //DictIndTeamByName = new Dictionary<string, int>();
+            //DictNameTeamByInd = new Dictionary<int, string>();
+            //DictFullName = new Dictionary<string, FullName>();
+
+            file = "tournaments//ТХЛ2018";
+            ReadFile(file);
+
+            SortStandings();
+            PrintStandingsWithoutScores();
+            //PrintScores();
 
             DrawingTable();
         }
@@ -50,23 +93,22 @@ namespace StandingsGen
             int marginLower = 80;
             int marginUpper = 160;
             int marginSides = 20;
-            int marginHorizontalLines = 4;
 
             int heightHat = 60;
             int heightTableRow = 100;
 
-            int widhtTeamName = 230;
-            int widhtScore = 100;
+            int widthTeamName = 230;
+            int widthScore = CalcWidhtScore();
             int widthIndicator = 80;
             int widthPucksDiff = 150;
 
             int reglamentSett = 6;
             int teamsCnt = teams.Count;
 
-            int widhtBitmap = 2 * marginSides + widhtTeamName + widhtScore * teamsCnt + widthIndicator * reglamentSett + widthPucksDiff;
+            int widthBitmap = 2 * marginSides + widthTeamName + widthScore * teamsCnt + widthIndicator * reglamentSett + widthPucksDiff;
             int heightBitmap = marginUpper + marginLower + heightHat + heightTableRow * teamsCnt;
             
-            Image bitmap = new Bitmap(widhtBitmap, heightBitmap);
+            Image bitmap = new Bitmap(widthBitmap, heightBitmap);
 
             Image imgLayer = Image.FromFile("images//layer.png");
             Image imgWinter = Image.FromFile("images//winter.png");
@@ -78,7 +120,20 @@ namespace StandingsGen
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-                var imgCut= GetInscribed(new Rectangle(0, 0, widhtBitmap, heightBitmap), new Size(widhtBitmap, heightBitmap));
+                #region EarlyBackground
+
+                int occurLayerBckgrSize = 10;
+
+                var rectBckgrLayer = new Rectangle(-occurLayerBckgrSize / 2, -occurLayerBckgrSize / 2,
+                    widthBitmap + occurLayerBckgrSize,
+                    heightBitmap + occurLayerBckgrSize);
+
+                var sizeBckgrLayer = new Size(widthBitmap + occurLayerBckgrSize,
+                    heightBitmap + occurLayerBckgrSize);
+
+                var inscBckrng = GetInscribed(rectBckgrLayer, sizeBckgrLayer);
+
+                int occurSocialPosition = 10;
 
                 var colorTableBckgr = ColorTranslator.FromHtml("#e0e6ea");
                 var colorLines = ColorTranslator.FromHtml("#00337f");
@@ -86,91 +141,467 @@ namespace StandingsGen
                 var brushTableBckrg = new SolidBrush(colorTableBckgr);
                 var brushLines = new SolidBrush(colorLines);
 
-                var rectBckgr = new Rectangle(0, marginUpper, widhtBitmap, heightBitmap - marginUpper - marginLower);
+                var occurTableBckg = 2;
+                var weightTableBckg = widthBitmap + 2 * occurTableBckg;
+                var heightTableBckg = heightBitmap - marginUpper - marginLower;
+                var rectTableBckgr = new Rectangle(-occurTableBckg, marginUpper, weightTableBckg, heightTableBckg);
 
-                g.DrawImage(imgLayer, imgCut);
-                g.FillRectangle(brushTableBckrg, rectBckgr);
-                g.DrawImage(imgWinter, imgCut);
+                g.DrawImage(imgLayer, inscBckrng);
+                g.FillRectangle(brushTableBckrg, rectTableBckgr);
+                g.DrawImage(imgWinter, inscBckrng);
 
-                var nameTableRect = new Rectangle(250, 25, 1100, 110);
+                #endregion
 
-                var brushWhite = new LinearGradientBrush(new Point(0, nameTableRect.Y),
-                                                         new Point(0, nameTableRect.Y + nameTableRect.Height / 2),
-                                                         ColorTranslator.FromHtml("#f1f1f1"),
-                                                         ColorTranslator.FromHtml("#ffffff"));
+                #region Drawing Hat + "UnderHat"
 
-                var brushBlue = new LinearGradientBrush(new Point(0, marginUpper),
-                                                        new Point(0, marginUpper + heightHat / 2),
-                                                        ColorTranslator.FromHtml("#00337f"),
-                                                        ColorTranslator.FromHtml("#0041a1"));
+                #region Hat
 
-                PrivateFontCollection fontColl = new PrivateFontCollection();
+                #region Liga + Logo
 
-                fontColl.AddFontFile("fonts//FiraSans-SemiBold.ttf");
-                var sizeFontTableName = 100;
-                var fontTableName = new Font(fontColl.Families[0], sizeFontTableName);
+                var fileNameLiga = $"ligas//{ligaName}_logo.png";
+
+                Image imgLiga = null;
+
+                if (!File.Exists(fileNameLiga))
+                    imgLiga = Image.FromFile("ligas//no_logo.png");
+                else
+                    imgLiga = Image.FromFile(fileNameLiga);
+
+                var marginSideLigaLogo = marginSides + 45;
+                var marginUpDownLigaLogo = 20;
+                var sizeLigaLogo = 120;
+
+                var rectLiga = new Rectangle(marginSideLigaLogo, marginUpDownLigaLogo, sizeLigaLogo, sizeLigaLogo);
+
+                var inscLigaLogo = GetInscribed(rectLiga, imgLiga.Size);
+
+                g.DrawImage(imgLiga, inscLigaLogo);
+
+                var imgAvi = Image.FromFile("teams//маи.png");
+                var xLogoAvi = widthBitmap - marginSideLigaLogo - sizeLigaLogo;
+                var yLogoAvi = marginUpDownLigaLogo;
+
+                var rectLogoAvi = new Rectangle(xLogoAvi, yLogoAvi, sizeLigaLogo, sizeLigaLogo);
+
+                var inscLogoAvi = GetInscribed(rectLogoAvi, imgAvi.Size);
+
+                g.DrawImage(imgAvi, inscLogoAvi);
+
+                #endregion
+
+                #region TableName
+
+                var marginFromLogo = 20;
+
+                var xTableName = marginSideLigaLogo + sizeLigaLogo + marginFromLogo;
+                var yTableName = marginUpDownLigaLogo * 2;
+                var widthTableName = widthBitmap - 2 * xTableName;
+                var heightTableName = sizeLigaLogo - marginUpDownLigaLogo;
+
+                var rectTableName = new Rectangle(xTableName, yTableName, widthTableName, heightTableName);
+
+                var brushWhite = new LinearGradientBrush(new Point(0, rectTableName.Y),
+                    new Point(0, rectTableName.Y + rectTableName.Height / 2 - 10),
+                    ColorTranslator.FromHtml("#dedede"),
+                    ColorTranslator.FromHtml("#ffffff"));
+
+                var fileFontTableName = "fonts//FiraSans-SemiBold.ttf";
+                var sizeFontTableName = 80;
+                var fontTableName = CreateFont(fileFontTableName, sizeFontTableName);
 
                 var fmt = new Format();
                 var centerFormat = fmt.centerFormat;
 
-                g.DrawString("МАГИСТР", fontTableName, brushWhite, nameTableRect, centerFormat);
+                g.DrawString("МАГИСТР", fontTableName, brushWhite, rectTableName, centerFormat);
 
-               
+                #endregion
+
+                #endregion
+
+                #region UnderHat
+
+                var rectInscSocial = new Rectangle(widthBitmap / 2 - imgBorn.Width / 2,
+                    heightBitmap - marginLower + occurSocialPosition,
+                    imgBorn.Width, imgBorn.Height);
+
+                g.DrawImage(imgBorn, rectInscSocial);
+
+                #endregion
+
+                #endregion
+
+                #region Names
+
+                var fileFontNames = "fonts//FiraSans-Regular.ttf";
+                var fileFontNamesForAvi = "fonts//FiraSans-Medium.ttf";
+                var sizeFontNames = 25;
+                var sizeFontInst = sizeFontNames * 0.9;
+
+
+
+                var marginUpTeamName = 13;
+                var marginUpTeamAloneName = 30;
+                var xTeamNames = 0;
+                var yTeamName = marginUpper + heightHat + marginUpTeamName;
+                var widthTN = marginSides + widthTeamName;
+                var heightTN = 50;
+
+                var distTeamInst = 37;
+                var yTeamInst = yTeamName + distTeamInst;
+
+                var someShitThatMakesMeHappy = 45;
+
+                for (int i = 0; i < teamsCnt; i++)
+                {
+                    var full = DictFullName[teams[i].name];
+
+                    if (full == null)
+                        continue;
+
+                    if (full.nameInst == "")
+                        yTeamName = marginUpper + heightHat + marginUpTeamAloneName;
+
+                    var rectTeamName = new Rectangle(xTeamNames, yTeamName + i * heightTableRow, widthTN, heightTN);
+                    var rectTeamInst = new Rectangle(xTeamNames, yTeamInst + i * heightTableRow, widthTN, heightTN);
+
+                    var ptBrName11 = new Point(0, rectTableName.Y);
+                    var ptBrName12 = new Point(0, rectTableName.Y + heightTN / 2);
+
+                    var ptBrName21 = new Point(0, rectTeamInst.Y);
+                    var ptBrName22 = new Point(0, rectTeamInst.Y + heightTN / 2);
+
+
+                    var brushName1 = new LinearGradientBrush(ptBrName11, ptBrName12,
+                        ColorTranslator.FromHtml("#00337f"),
+                        ColorTranslator.FromHtml("#0041a1"));
+
+                    var brushName2 = new LinearGradientBrush(ptBrName21, ptBrName22,
+                        ColorTranslator.FromHtml("#00337f"),
+                        ColorTranslator.FromHtml("#0041a1"));
+
+                    Font fontTeamName = null;
+                    Font fontTeamInst = null;
+
+                    if (full.nameTeam.Contains("виаторы"))
+                        fontTeamName = CreateFont(fileFontNamesForAvi, CalcFontSize(full.nameTeam.Length, widthTN + someShitThatMakesMeHappy, sizeFontNames));
+                    else 
+                        fontTeamName = CreateFont(fileFontNames, CalcFontSize(full.nameTeam.Length, widthTN + someShitThatMakesMeHappy, sizeFontNames));
+
+                    g.DrawString(full.nameTeam, fontTeamName, brushName1, rectTeamName, centerFormat);
+
+                    if (full.nameTeam.Contains("виаторы"))
+                        fontTeamInst = CreateFont(fileFontNamesForAvi, CalcFontSize(full.nameInst.Length, widthTN + someShitThatMakesMeHappy, (int)sizeFontInst));
+                    else
+                        fontTeamInst = CreateFont(fileFontNames, CalcFontSize(full.nameInst.Length, widthTN + someShitThatMakesMeHappy, (int)sizeFontInst));
+
+                    g.DrawString(full.nameInst, fontTeamInst, brushName2, rectTeamInst, centerFormat);
+
+                    yTeamName = marginUpper + heightHat + marginUpTeamName;
+                }
+
+                #endregion
+
+                #region Lines
+
+                #region HorizontalMain
+
+                int marginHorizontalLines = 4;
+                int widthLines = 4;
+                var widthInTableLine = 3;
+
+                var brushBlue = new LinearGradientBrush(new Point(0, marginUpper),
+                    new Point(0, marginUpper + heightHat / 2),
+                    ColorTranslator.FromHtml("#00337f"),
+                    ColorTranslator.FromHtml("#0041a1"));
 
                 for (int i = 0; i < teamsCnt + 1; ++i)
                 {
                     //g.DrawRectangle(new Pen(rectCol, 1), 4, 220 + i * 100, 1592, 4);
                     g.FillRectangle(brushLines, marginHorizontalLines,
-                                    marginUpper + heightHat + i * heightTableRow,
-                                    widhtBitmap - 2 * marginHorizontalLines, 4);
+                        marginUpper + heightHat + i * heightTableRow,
+                        widthBitmap - 2 * marginHorizontalLines, widthLines);
                 }
 
-                g.FillRectangle(brushLines, 250, 221, 4, heightBitmap - marginUpper - marginLower - heightHat);
+                #endregion
+
+                #region VerticMain
+
+                var occurVerticLine = 1;
+
+                var xVerticLine = marginSides + widthTeamName;
+                var yVerticLine = marginUpper + heightHat + occurVerticLine;
+                var heigtVerticLine = heightBitmap - marginUpper - marginLower - heightHat;
+
+                var rectVerticLine = new Rectangle(xVerticLine, yVerticLine, widthLines, heigtVerticLine);
+
+                g.FillRectangle(brushLines, rectVerticLine);
+
+                #endregion
+
+                #region InScore
 
                 for (int i = 0; i < teamsCnt; ++i)
                 {
                     for (int j = 0; j < teamsCnt; ++j)
                     {
-                        g.FillRectangle(brushLines, 350 + i * 100, 230 + j * 100, 3, 80);
+                        var marginVerticLineInTable = 10;
+
+                        var xVerticsInTable = marginSides + widthTeamName + widthScore;
+                        var yVerticsInTable = marginUpper + heightHat + marginVerticLineInTable;
+
+                        var rectVerticsInTable = new Rectangle(xVerticsInTable + i * widthScore, yVerticsInTable + j * heightTableRow,
+                                                               widthInTableLine, heightTableRow - 2 * marginVerticLineInTable);
+
+                        g.FillRectangle(brushLines, rectVerticsInTable);
+
+                        if (i == j)
+                            continue;
+
+                        if (gamesBetween > 1)
+                        {
+                            var marginSideInScoreBox = 27;
+                            var marginUpInScoreBox = 50;
+                            var occurScoreOverTwo = 1;
+
+                            var xHorLineInBox = occurScoreOverTwo + marginSides + widthTeamName + marginSideInScoreBox;
+                            var yHorLineInBox = marginUpper + heightHat + marginUpInScoreBox;
+                            var widthHorLineInBox = widthScore / 2;
+                            var heightHorLineInBox = 2;
+
+
+                            if (gamesBetween == 2)
+                            {
+                                var rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
+                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+
+                                g.FillRectangle(brushLines, rectHorLineInBox);
+                            }
+
+
+                            if (gamesBetween == 4)
+                            {
+                                widthHorLineInBox = widthScore / 3;
+
+                                var rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
+                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+
+                                g.FillRectangle(brushLines, rectHorLineInBox);
+
+                                xHorLineInBox = xHorLineInBox + widthScore - widthHorLineInBox - 2 * marginSideInScoreBox;
+
+                                rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
+                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+
+                                g.FillRectangle(brushLines, rectHorLineInBox);
+
+                                var marginUpVerInScoreBox = 10;
+                                var xVerLineInBox = marginSides + widthTeamName + widthScore / 2;
+                                var yVerLineInBox = occurScoreOverTwo + marginUpper + heightHat + marginUpVerInScoreBox;
+                                var heightVerLineInBox = heightTableRow / 3;
+                                var widhtVerLineInBox = heightHorLineInBox;
+
+                                var rectVerLineInBox = new Rectangle(xVerLineInBox + j * widthScore,
+                                    yVerLineInBox + i * heightTableRow, widhtVerLineInBox, heightVerLineInBox);
+
+                                g.FillRectangle(brushLines, rectVerLineInBox);
+
+                                yVerLineInBox = yVerLineInBox + heightTableRow - heightVerLineInBox -
+                                                2 * marginUpVerInScoreBox;
+
+                                rectVerLineInBox = new Rectangle(xVerLineInBox + j * widthScore,
+                                    yVerLineInBox + i * heightTableRow, widhtVerLineInBox, heightVerLineInBox);
+
+                                g.FillRectangle(brushLines, rectVerLineInBox);
+
+                            }
+                        }
+
                     }
                 }
 
+                #endregion
+
+                #endregion
+
+                #region Logos
 
                 for (int i = 0; i < teamsCnt; ++i)
                 {
                     var name = teams[i].name;
-                    Image teamLogo = Image.FromFile($"teams//{name}.png");
 
-                    int inBoxMarginForLogo = 13;
-                    int sizeOfLogo = 80;
+                    var fileNameTeam = $"teams//{name}.png";
 
-                    var pos = new Rectangle(marginSides + widhtTeamName + inBoxMarginForLogo + i * 100,
-                                            marginUpper + heightHat + inBoxMarginForLogo + i * 100,
-                                            sizeOfLogo, sizeOfLogo);
+                    Image imgLogo = null;
 
-                    var kkk = GetInscribed(pos, teamLogo.Size);
+                    if (!File.Exists(fileNameTeam))
+                        imgLogo = Image.FromFile("teams//nologo.png");
+                    else
+                        imgLogo = Image.FromFile(fileNameTeam);
 
-                    g.DrawImage(teamLogo, kkk);
+                    var marginInBoxForLogo = 7;
+                    var occurX = 5;
+                    var occurY = 2;
+                    var sizeOfLogo = 85;
+
+                    var xLogo = marginSides + widthTeamName + marginInBoxForLogo + widthScore / 2 - sizeOfLogo / 2 - occurX;
+                    var yLogo = marginUpper + heightHat + marginInBoxForLogo + occurY;
+
+                    var rectLogo = new Rectangle(xLogo + i * widthScore, yLogo + i * heightTableRow, sizeOfLogo, sizeOfLogo);
+
+                    var inscLogo = GetInscribed(rectLogo, imgLogo.Size);
+
+                    g.DrawImage(imgLogo, inscLogo);
                     //g.DrawString(name, f, br, sidesMargin + teamNameWidht + inBoxMarginForLogo + i * 100, upperMagrin + hatHight + inBoxMarginForLogo + i * 100);
 
                 }
 
-                fontColl.AddFontFile("fonts//FiraSans-ExtraBold.ttf");
-                var hatF = new Font(fontColl.Families[0], 35);
+                #endregion
+
+                #region Scores
+
+                var fontWin = "fonts//FiraSans-Medium.ttf";
+                var fontOt = "fonts//FiraSans-Medium.ttf";
+                var fontLose = "fonts//FiraSans-Light.ttf";
+                var sizeFontScore = 30;
+                var sizeFontOT = sizeFontScore / 5;
+
+
 
                 for (int i = 0; i < teamsCnt; ++i)
                 {
-                    int startPos = marginSides + widhtTeamName;
-                    
-                    var rect = new Rectangle(startPos + i * widhtScore, marginUpper + 5, widhtScore, heightHat);
+                    for (int j = 0; j < teamsCnt; ++j)
+                    {
+                        if (i == j)
+                            continue;
 
-                    g.DrawString((i + 1).ToString(), hatF, brushBlue, rect, centerFormat);
+                        var indSide = DictIndTeamByName[teams[i].name];
+                        var indUp = DictIndTeamByName[teams[j].name];
+
+                        var workList = games[indSide][indUp];
+
+                        if (workList.Count == 0)
+                            continue;
+
+
+                        if (gamesBetween == 1)
+                        {
+                            Font fontScore = null;
+                            var workGame = workList[0];
+
+                            if (workGame.HomeTeamGoals > workGame.AwayTeamGoals)
+                                fontScore = CreateFont(fontWin, sizeFontScore);
+                            else
+                                fontScore = CreateFont(fontLose, sizeFontScore);
+
+
+                            var marginUpScore = heightTableRow / 4;
+
+                            var xScore = marginSides + widthTeamName;
+                            var yScore = marginUpper + heightHat + marginUpScore;
+
+                            var rectScore = new Rectangle(xScore + j * widthScore, yScore + i * heightTableRow,
+                                widthScore, heightTableRow/2);
+
+                            var strScore = $"{workGame.HomeTeamGoals}:{workGame.AwayTeamGoals}";
+
+                            g.DrawString(strScore, fontScore, brushBlue, rectScore, centerFormat);
+
+                            if (workGame.IsOt > 0)
+                            {
+                                int xOt =  xScore +  strScore.Length * (int)fontScore.Size;
+                                int yOt = yScore + heightTableRow / 2;
+
+                                var fontOtPen = CreateFont(fontOt, sizeFontOT);
+
+                                var rectOt = new Rectangle(xOt + j * widthScore, yOt + i * heightTableRow,
+                                    widthScore / 5, heightTableRow / 2 / 5);
+
+                                g.DrawString("б", fontOtPen, brushBlue, rectOt, centerFormat);
+                            }
+                        }
+
+                        if (gamesBetween > 1)
+                        {
+                            var marginSideInScoreBox = 27;
+                            var marginUpInScoreBox = 50;
+                            var occurScoreOverTwo = 1;
+
+                            var xHorLineInBox = occurScoreOverTwo + marginSides + widthTeamName + marginSideInScoreBox;
+                            var yHorLineInBox = marginUpper + heightHat + marginUpInScoreBox;
+                            var widthHorLineInBox = widthScore / 2;
+                            var heightHorLineInBox = 2;
+
+
+                            if (gamesBetween == 2)
+                            {
+                                var rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
+                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+
+                                g.FillRectangle(brushLines, rectHorLineInBox);
+                            }
+
+
+                            if (gamesBetween == 4)
+                            {
+                                widthHorLineInBox = widthScore / 3;
+
+                                var rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
+                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+
+                                g.FillRectangle(brushLines, rectHorLineInBox);
+
+                                xHorLineInBox = xHorLineInBox + widthScore - widthHorLineInBox - 2 * marginSideInScoreBox;
+
+                                rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
+                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+
+                                g.FillRectangle(brushLines, rectHorLineInBox);
+
+                                var marginUpVerInScoreBox = 10;
+                                var xVerLineInBox = marginSides + widthTeamName + widthScore / 2;
+                                var yVerLineInBox = occurScoreOverTwo + marginUpper + heightHat + marginUpVerInScoreBox;
+                                var heightVerLineInBox = heightTableRow / 3;
+                                var widhtVerLineInBox = heightHorLineInBox;
+
+                                var rectVerLineInBox = new Rectangle(xVerLineInBox + j * widthScore,
+                                    yVerLineInBox + i * heightTableRow, widhtVerLineInBox, heightVerLineInBox);
+
+                                g.FillRectangle(brushLines, rectVerLineInBox);
+
+                                yVerLineInBox = yVerLineInBox + heightTableRow - heightVerLineInBox -
+                                                2 * marginUpVerInScoreBox;
+
+                                rectVerLineInBox = new Rectangle(xVerLineInBox + j * widthScore,
+                                    yVerLineInBox + i * heightTableRow, widhtVerLineInBox, heightVerLineInBox);
+
+                                g.FillRectangle(brushLines, rectVerLineInBox);
+
+                            }
+                        }
+
+                    }
+                }
+
+                #endregion
+
+                var fileFontHat = "fonts//FiraSans-ExtraBold.ttf";
+                var sizeFontHat = 35;
+
+                var fontHat = CreateFont(fileFontHat, sizeFontHat);
+
+                for (int i = 0; i < teamsCnt; ++i)
+                {
+                    int startPos = marginSides + widthTeamName;
+                    
+                    var rect = new Rectangle(startPos + i * widthScore, marginUpper + 5, widthScore, heightHat);
+
+                    g.DrawString((i + 1).ToString(), fontHat, brushBlue, rect, centerFormat);
                 }
             }
 
 
 
-            var file = "kek.png";
+            var file = $"{ligaName}.png";
 
             EncoderParameters myEncoderParameters = new EncoderParameters(1);
             System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
@@ -181,6 +612,31 @@ namespace StandingsGen
 
             bitmap.Save(file, pngEncoder, myEncoderParameters);
             Console.WriteLine("Сохранил!\n");
+        }
+
+
+        private static float CalcFontSize(int nameTeamLength, int widthTn, float sizeFontNames)
+        {
+            //var sf = (float) sizeFontNames;
+
+            while (sizeFontNames * nameTeamLength > widthTn)
+                sizeFontNames -= 0.1f;
+
+            return sizeFontNames;
+        }
+
+        private static Font CreateFont(string f, float size)
+        {
+            PrivateFontCollection fontColl = new PrivateFontCollection();
+
+            fontColl.AddFontFile(f);
+
+            return new Font(fontColl.Families[0], size);
+        }
+
+        private static int CalcWidhtScore()
+        {
+            return gamesBetween > 2 ? 200 : 100;
         }
 
         #region DrawingHelp
@@ -296,11 +752,11 @@ namespace StandingsGen
             pointPerWinInMainTime = Convert.ToInt32(lines[2]);
             pointPerWinAfterMainTime = Convert.ToInt32(lines[3]);
             pointPerLoseAfterMainTime = Convert.ToInt32(lines[4]);
+            ligaName = lines[5];
 
-            for(int i = 5; i < lines.Count; ++i)
-            {
+
+            for (int i = 6; i < lines.Count; ++i)
                 ParseGame(lines[i]);
-            }
         }
 
         private static void ParseGame(string v)
