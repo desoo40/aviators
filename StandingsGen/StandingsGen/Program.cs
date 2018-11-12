@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace StandingsGen
 {
@@ -27,97 +29,40 @@ namespace StandingsGen
 
         static void Main(string[] args)
         {
-            sett = new Settings();
-            teams = new List<Team>();
-            DictIndTeamByName = new Dictionary<string, int>();
-            DictNameTeamByInd = new Dictionary<int, string>();
-            DictFullName = new Dictionary<string, FullName>();
-
-
             var file = "tournaments//МСХЛ2018";
-            ReadFile(file);
-
-            SortStandings();
-            PrintStandingsWithoutScores();
-            //PrintScores();
-
+            Presets(file);
             DrawingTable();
 
+            file = "tournaments//МСХЛА2018";
+            Presets(file);
+            DrawingTable();
+
+            file = "tournaments//МСХЛБ2018";
+            Presets(file);
+            DrawingTable();
+
+            file = "tournaments//СХЛЗ2018";
+            Presets(file);
+            DrawingTable();
+
+            file = "tournaments//СХЛВ2018";
+            Presets(file);
+            DrawingTable();
+        }
+
+        private static void Presets(string file)
+        {
             sett = new Settings();
             teams = new List<Team>();
             DictIndTeamByName = new Dictionary<string, int>();
             DictNameTeamByInd = new Dictionary<int, string>();
             DictFullName = new Dictionary<string, FullName>();
 
-            file = "tournaments//СХЛ2018";
+
             ReadFile(file);
 
             SortStandings();
             PrintStandingsWithoutScores();
-            //PrintScores();
-
-            DrawingTable();
-
-
-            //sett = new Settings();
-            //teams = new List<Team>();
-            //DictIndTeamByName = new Dictionary<string, int>();
-            //DictNameTeamByInd = new Dictionary<int, string>();
-            //DictFullName = new Dictionary<string, FullName>();
-
-            //file = "tournaments//НХЛ2018";
-            //ReadFile(file);
-
-            //SortStandings();
-            //PrintStandingsWithoutScores();
-            ////PrintScores();
-
-            //DrawingTable();
-
-            //sett = new Settings();
-            //teams = new List<Team>();
-            //DictIndTeamByName = new Dictionary<string, int>();
-            //DictNameTeamByInd = new Dictionary<int, string>();
-            //DictFullName = new Dictionary<string, FullName>();
-
-            //file = "tournaments//ТХЛ2018";
-            //ReadFile(file);
-
-            //SortStandings();
-            //PrintStandingsWithoutScores();
-            ////PrintScores();
-
-            //DrawingTable();
-
-            //sett = new Settings();
-            //teams = new List<Team>();
-            //DictIndTeamByName = new Dictionary<string, int>();
-            //DictNameTeamByInd = new Dictionary<int, string>();
-            //DictFullName = new Dictionary<string, FullName>();
-
-            //file = "tournaments//МСХЛБ2018";
-            //ReadFile(file);
-
-            //SortStandings();
-            //PrintStandingsWithoutScores();
-            ////PrintScores();
-
-            //DrawingTable();
-
-            //sett = new Settings();
-            //teams = new List<Team>();
-            //DictIndTeamByName = new Dictionary<string, int>();
-            //DictNameTeamByInd = new Dictionary<int, string>();
-            //DictFullName = new Dictionary<string, FullName>();
-
-            //file = "tournaments//МСХЛА2018";
-            //ReadFile(file);
-
-            //SortStandings();
-            //PrintStandingsWithoutScores();
-            ////PrintScores();
-
-            //DrawingTable();
         }
 
         private static void DrawingTable()
@@ -139,7 +84,7 @@ namespace StandingsGen
             var teamsCnt = teams.Count;
 
             var widhtPartScore = widthScore * teamsCnt;
-            var widthPartIndicators = widthIndicator * indicCtn; // + widthPucksDiff - widthIndicator
+            var widthPartIndicators = CalcIndicWidth(); // + widthPucksDiff - widthIndicator
             var widthBitmap = 2 * marginSides + widthTeamName + widhtPartScore + widthPartIndicators;
             var heightBitmap = marginUpper + marginLower + heightHat + heightTableRow * teamsCnt;
 
@@ -168,7 +113,6 @@ namespace StandingsGen
 
                 var inscBckrng = GetInscribed(rectBckgrLayer, sizeBckgrLayer);
 
-                int occurSocialPosition = 10;
 
                 var colorTableBckgr = ColorTranslator.FromHtml("#e0e6ea");
                 var colorLines = ColorTranslator.FromHtml("#00337f");
@@ -212,7 +156,8 @@ namespace StandingsGen
 
                 g.DrawImage(imgLiga, inscLigaLogo);
 
-                var imgAvi = Image.FromFile("teams//маи.png");
+                //var imgAvi = Image.FromFile("teams//маи.png");
+                var imgAvi = Image.FromFile(ForWho());
                 var xLogoAvi = widthBitmap - marginSideLigaLogo - sizeLigaLogo;
                 var yLogoAvi = marginUpDownLigaLogo;
 
@@ -236,7 +181,7 @@ namespace StandingsGen
                 var rectTableName = new Rectangle(xTableName, yTableName, widthTableName, heightTableName);
 
                 var brushWhite = new LinearGradientBrush(new Point(0, rectTableName.Y),
-                    new Point(0, rectTableName.Y + rectTableName.Height / 2 - 10),
+                    new Point(0, rectTableName.Y + rectTableName.Height / 2 - 5),
                     ColorTranslator.FromHtml("#dedede"),
                     ColorTranslator.FromHtml("#ffffff"));
 
@@ -254,6 +199,9 @@ namespace StandingsGen
                 #endregion
 
                 #region UnderHat
+
+                var occurSocialPosition = 15;
+
 
                 var rectInscSocial = new Rectangle(widthBitmap / 2 - imgBorn.Width / 2,
                     heightBitmap - marginLower + occurSocialPosition,
@@ -291,115 +239,17 @@ namespace StandingsGen
 
                 }
 
-                var cntDone = -1;
-
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < sett.ListIndicators.Count; i++)
                 {
 
-                    var nameInd = "";
-                    var widthCurrInd = widthIndicator;
+                    var nameInd = sett.ListIndicators[i].Name;
+                    var widthCurrInd = sett.ListIndicators[i].Widht;
+                    var widthPredInd = i > 0 ? sett.ListIndicators[i - 1].Widht : 0;
 
-                    switch (i)
-                    {
-                        case 1:
-                            if (sett.PartG)
-                            {
-                                nameInd = "И";
-                                ++cntDone;
-                            }
+                    xHatTAbleIndic += widthPredInd;
 
-                            break;
 
-                        case 2:
-                            if (sett.PartW)
-                            {
-                                nameInd = "В";
-                                ++cntDone;
-                            }
-
-                            break;
-
-                        case 3:
-                            if (sett.PartWO)
-                            {
-                                nameInd = "ВО";
-                                ++cntDone;
-                            }
-
-                            break;
-
-                        case 4:
-                            if (sett.PartWP)
-                            {
-                                nameInd = "ВБ";
-                                ++cntDone;
-                            }
-
-                            break;
-
-                        case 5:
-                            if (sett.PartLP)
-                            {
-                                nameInd = "ПБ";
-                                ++cntDone;
-                            }
-
-                            break;
-
-                        case 6:
-                            if (sett.PartLO)
-                            {
-                                nameInd = "ПО";
-                                ++cntDone;
-                            }
-
-                            break;
-
-                        case 7:
-                            if (sett.PartL)
-                            {
-                                nameInd = "П";
-                                ++cntDone;
-                            }
-
-                            break;
-
-                        
-
-                        case 9:
-                            if (sett.PartGF)
-                            {
-                                nameInd = "ГЗ";
-                                ++cntDone;
-                            }
-                            break;
-
-                        case 11:
-                            if (sett.PartGA)
-                            {
-                                nameInd = "ГП";
-                                ++cntDone;
-                            }
-                            break;
-
-                        case 12:
-                            if (sett.PartDiffPM)
-                            {
-                                nameInd = "Р";
-                                ++cntDone;
-                            }
-                            break;
-
-                        case 13:
-                            if (sett.PartP)
-                            {
-                                nameInd = "О";
-                                ++cntDone;
-                            }
-                            break;
-                    }
-
-                    var rectHatTableIndic = new Rectangle(xHatTAbleIndic + cntDone * widthCurrInd, yHatTable, widthCurrInd, heightHat);
+                    var rectHatTableIndic = new Rectangle(xHatTAbleIndic, yHatTable, widthCurrInd, heightHat);
                     //g.DrawRectangle(Pens.Red, rectHatTableIndic);
                     g.DrawString(nameInd, fontHat, brushBlue, rectHatTableIndic, centerFormat);
 
@@ -516,28 +366,52 @@ namespace StandingsGen
                     var rectVerticLine = new Rectangle(xVerticLine, yVerticLine, widthLines, heigtVerticLine);
 
                     g.FillRectangle(brushLines, rectVerticLine);
+
+                   
                 }
+
+                if (sett.PartScores)
+                {
+                    var occurVerticLine = 1;
+
+                    var xVerticLine = marginSides + widthTeamName;
+                    var yVerticLine = marginUpper + heightHat + occurVerticLine;
+                    var heigtVerticLine = heightBitmap - marginUpper - marginLower - heightHat;
+
+                    var rectVerticLine = new Rectangle(xVerticLine + widhtPartScore, yVerticLine, widthLines, heigtVerticLine);
+
+                    g.FillRectangle(brushLines, rectVerticLine);
+                }
+
+                
+
                 #endregion
 
                 #region InScore
 
-                bool inSett = false;
+
                 for (int i = 0; i < teamsCnt ; ++i)
                 {
                     var marginVerticLineInTable = 10;
                     var yVerticsInTable = marginUpper + heightHat + marginVerticLineInTable;
+                    var xVerticsInTable = marginSides + widthTeamName + widhtPartScore;
 
-                    for (int k = 0; k + 1 < sett.truesCnt; ++k)
+                    for (int k = 0; k + 1 < sett.ListIndicators.Count; ++k)
                     {
-                        var xVerticsInTable = marginSides + widthTeamName + widhtPartScore + widthIndicator;
+                        var widthCurrInd = sett.ListIndicators[k].Widht;
 
-                        var rectVerticsInTable = new Rectangle(xVerticsInTable + k*widthIndicator, yVerticsInTable + i * heightTableRow,
+
+                        xVerticsInTable += widthCurrInd;
+
+                        var rectVerticsInTable = new Rectangle(xVerticsInTable, yVerticsInTable + i * heightTableRow,
                             widthInTableLine, heightTableRow - 2 * marginVerticLineInTable);
 
                         g.FillRectangle(brushLines, rectVerticsInTable);
                     }
 
-                    for (int j = 0; j < teamsCnt; ++j)
+                    bool inSett = false;
+
+                    for (int j = 0; j + 1 < teamsCnt; ++j)
                     {
                         if (!sett.PartNames && !inSett)
                         {
@@ -545,18 +419,21 @@ namespace StandingsGen
                             inSett = true;
                         }
 
-                        var xVerticsInTable = marginSides + widthTeamName + widthScore;
-                        
+                        xVerticsInTable = marginSides + widthTeamName + widthScore;
 
-                        var rectVerticsInTable = new Rectangle(xVerticsInTable + j * widthScore, yVerticsInTable + i * heightTableRow,
+
+                        var rectVerticsInTable = new Rectangle(xVerticsInTable + j * widthScore,
+                            yVerticsInTable + i * heightTableRow,
                             widthInTableLine, heightTableRow - 2 * marginVerticLineInTable);
-                        
+
 
                         g.FillRectangle(brushLines, rectVerticsInTable);
 
-                        
+                    }
 
-                        if (i == j)
+                    for (int j = 0; j < teamsCnt; ++j)
+                    {
+                            if (i == j)
                             continue;
 
                         if (sett.GamesBetween > 1)
@@ -722,7 +599,7 @@ namespace StandingsGen
                             {
                                 var marginSideOt = widthScore / 4;
                                 var xOt = xScore + widthScore - marginSideOt;
-                                var yOt = yScore + heightStrScore - 2 * occurStr;
+                                var yOt = yScore + heightStrScore * 3 / 4;
                                 var widthOt = widthScore / 4;
                                 var heightOt = heightStrScore / 2;
 
@@ -732,81 +609,186 @@ namespace StandingsGen
                                     widthOt, heightOt);
 
                                 //g.DrawRectangle(new Pen(Color.Red), rectOt);
-
-                                g.DrawString("Б", fontOtPen, brushBlue, rectOt, centerFormat);
+                                var strPorOt = workGame.IsOt == 1 ? "ОТ" : "Б";
+                                g.DrawString(strPorOt, fontOtPen, brushBlue, rectOt, centerFormat);
                             }
                         }
 
-                        if (sett.GamesBetween > 1)
+                        if (sett.GamesBetween == 2)
                         {
-                            var marginSideInScoreBox = 27;
-                            var marginUpInScoreBox = 50;
-                            var occurScoreOverTwo = 1;
+                            var occurStrTwo = 4;
+                            var sizeFontScoreTwo = 30;
+                            var sizeFontOTTwo = sizeFontScoreTwo / 2.5f;
+                            Font fontScore = null;
 
-                            var xHorLineInBox = occurScoreOverTwo + marginSides + widthTeamName + marginSideInScoreBox;
-                            var yHorLineInBox = marginUpper + heightHat + marginUpInScoreBox;
-                            var widthHorLineInBox = widthScore / 2;
-                            var heightHorLineInBox = 2;
-
-
-                            if (sett.GamesBetween == 2)
+                            for (int k = 0; k < workList.Count; ++k)
                             {
-                                var rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
-                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+                                var workGame = workList[k];
 
-                                g.FillRectangle(brushLines, rectHorLineInBox);
+                                if (workGame.HomeTeamGoals > workGame.AwayTeamGoals)
+                                    fontScore = CreateFont(fontWin, sizeFontScoreTwo);
+                                else
+                                    fontScore = CreateFont(fontLose, sizeFontScoreTwo);
+
+                                var heightStrScore = 30;
+                                var marginUpScore = heightTableRow / 4 - heightStrScore / 2;
+                                var marginSidesScore = 5;
+
+
+                                var xScore = marginSides + widthTeamName + occurStrTwo / 2 - marginSidesScore;
+                                var yScore = marginUpper + heightHat + marginUpScore + occurStrTwo;
+                                var widthStrScore = widthScore + 2 * marginSidesScore;
+
+                                var addTwo = k * 3 * heightStrScore / 2;
+
+                                var rectScore = new Rectangle(xScore + j * widthScore, yScore + i * heightTableRow + addTwo,
+                                    widthStrScore, heightStrScore + 2 * occurStrTwo);
+
+                                //var rectScore1 = new Rectangle(xScore + j * widthScore, yScore + i * heightTableRow,
+                                //    widthStrScore, heightStrScore);
+
+                                //g.DrawRectangle(new Pen(Color.Red), rectScore);
+
+                                var strScore = $"{workGame.HomeTeamGoals}:{workGame.AwayTeamGoals}";
+
+                                g.DrawString(strScore, fontScore, brushBlue, rectScore, centerFormat);
+
+                                if (workGame.IsOt > 0)
+                                {
+                                    var marginSideOt = widthScore / 4;
+                                    var xOt = xScore + widthScore - marginSideOt;
+                                    var yOt = yScore + heightStrScore * 3 / 4;
+                                    var widthOt = widthScore / 4;
+                                    var heightOt = heightStrScore / 2;
+
+                                    var fontOtPen = CreateFont(fontOt, sizeFontOTTwo);
+
+                                    var rectOt = new Rectangle(xOt + j * widthScore, yOt + i * heightTableRow + addTwo,
+                                        widthOt, heightOt);
+
+                                    //g.DrawRectangle(new Pen(Color.Red), rectOt);
+                                    var strPorOt = workGame.IsOt == 1 ? "ОТ" : "Б";
+                                    g.DrawString(strPorOt, fontOtPen, brushBlue, rectOt, centerFormat);
+                                }
                             }
+                            
+                        }
 
 
-                            if (sett.GamesBetween == 4)
+                        if (sett.GamesBetween == 4)
+                        {
+                            var occurStrTwo = 4;
+                            var sizeFontScoreFour = 30;
+                            var sizeFontOTFour = sizeFontScoreFour / 2.5f;
+                            Font fontScore = null;
+
+                            var sum = 0;
+
+                            for (int k = 0; sum < workList.Count; ++k)
                             {
-                                widthHorLineInBox = widthScore / 3;
+                                for (int l = 0; l < 2; l++)
+                                {
+                                    var workGame = workList[sum];
 
-                                var rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
-                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+                                    if (workGame.HomeTeamGoals > workGame.AwayTeamGoals)
+                                        fontScore = CreateFont(fontWin, sizeFontScoreFour);
+                                    else
+                                        fontScore = CreateFont(fontLose, sizeFontScoreFour);
 
-                                g.FillRectangle(brushLines, rectHorLineInBox);
+                                    var heightStrScore = 30;
+                                    var marginUpScore = heightTableRow / 4 - heightStrScore / 2;
+                                    var marginSidesScore = 5;
 
-                                xHorLineInBox = xHorLineInBox + widthScore - widthHorLineInBox - 2 * marginSideInScoreBox;
 
-                                rectHorLineInBox = new Rectangle(xHorLineInBox + j * widthScore,
-                                    yHorLineInBox + i * heightTableRow, widthHorLineInBox, heightHorLineInBox);
+                                    var xScore = marginSides + widthTeamName + occurStrTwo / 2 - marginSidesScore;
+                                    var yScore = marginUpper + heightHat + marginUpScore + occurStrTwo;
+                                    var widthStrScore = widthScore / 2 + 2 * marginSidesScore;
 
-                                g.FillRectangle(brushLines, rectHorLineInBox);
+                                    var xAddFour = l *  (widthStrScore - 2 * marginSidesScore - occurStrTwo / 2);
+                                    var yAddFour = k * 3 * heightStrScore / 2;
 
-                                var marginUpVerInScoreBox = 10;
-                                var xVerLineInBox = marginSides + widthTeamName + widthScore / 2;
-                                var yVerLineInBox = occurScoreOverTwo + marginUpper + heightHat + marginUpVerInScoreBox;
-                                var heightVerLineInBox = heightTableRow / 3;
-                                var widhtVerLineInBox = heightHorLineInBox;
+                                    var rectScore = new Rectangle(xScore + j * widthScore + xAddFour, yScore + i * heightTableRow + yAddFour,
+                                        widthStrScore, heightStrScore + 2 * occurStrTwo);
 
-                                var rectVerLineInBox = new Rectangle(xVerLineInBox + j * widthScore,
-                                    yVerLineInBox + i * heightTableRow, widhtVerLineInBox, heightVerLineInBox);
+                                    //var rectScore1 = new Rectangle(xScore + j * widthScore, yScore + i * heightTableRow,
+                                    //    widthStrScore, heightStrScore);
 
-                                g.FillRectangle(brushLines, rectVerLineInBox);
+                                    //g.DrawRectangle(new Pen(Color.Red), rectScore);
 
-                                yVerLineInBox = yVerLineInBox + heightTableRow - heightVerLineInBox -
-                                                2 * marginUpVerInScoreBox;
+                                    var strScore = $"{workGame.HomeTeamGoals}:{workGame.AwayTeamGoals}";
 
-                                rectVerLineInBox = new Rectangle(xVerLineInBox + j * widthScore,
-                                    yVerLineInBox + i * heightTableRow, widhtVerLineInBox, heightVerLineInBox);
+                                    g.DrawString(strScore, fontScore, brushBlue, rectScore, centerFormat);
 
-                                g.FillRectangle(brushLines, rectVerLineInBox);
+                                    if (workGame.IsOt > 0)
+                                    {
+                                        var marginSideOt = widthScore / 10;
+                                        var xOt = xScore + widthScore / 2 - marginSideOt;
+                                        var yOt = yScore + heightStrScore * 3 / 4;
+                                        var widthOt = widthScore / 4;
+                                        var heightOt = heightStrScore / 2;
 
+                                        var fontOtPen = CreateFont(fontOt, sizeFontOTFour);
+
+                                        var rectOt = new Rectangle(xOt + j * widthScore + xAddFour, yOt + i * heightTableRow + yAddFour,
+                                            widthOt, heightOt);
+
+                                        g.DrawRectangle(new Pen(Color.Red), rectOt);
+                                        var strPorOt = workGame.IsOt == 1 ? "ОТ" : "Б";
+                                        g.DrawString(strPorOt, fontOtPen, brushBlue, rectOt, fmt.leftFormat);
+                                    }
+
+                                    ++sum;
+                                }
                             }
                         }
+                        
 
                     }
                 }
 
                 #endregion
 
-               
-            }
+                #region Indicators
+
+                var fontIndic = "fonts//FiraSans-Bold.ttf";
+                var sizeFontIndic = 35;
+
+                for (int i = 0; i < teamsCnt; ++i)
+                {
+                    var occurStr = 2;
+
+                    var heightStrScore = 40;
+                    var marginUpScore = heightTableRow / 2 - heightStrScore / 2;
+                    var marginSidesScore = 5;
+
+                    var xIndic = marginSides + widthTeamName + widhtPartScore + 3*occurStr - marginSidesScore;
+                    var yIndic = marginUpper + heightHat + marginUpScore + occurStr;
+
+
+                    for (int k = 0; k < sett.ListIndicators.Count; ++k)
+                    {
+                        var widthCurrInd = sett.ListIndicators[k].Widht;
+                        var widthPredInd = k > 0 ? sett.ListIndicators[k - 1].Widht : 0;
+
+                        xIndic += widthPredInd;
+
+                        var rectIndic = new Rectangle(xIndic, yIndic + i * heightTableRow,
+                            widthCurrInd, heightStrScore);
+
+                        var fontInd = CreateFont(fontIndic, sizeFontIndic);
+                        var strIndic = CreateIndicStr(sett.ListIndicators[k].Name, i);
+
+                        g.DrawString(strIndic, fontInd, brushBlue, rectIndic, centerFormat);
+                    }
+                }
+
+                #endregion
+
+                }
 
 
 
-            var file = $"{sett.NameLiga}.png";
+            var file = $"{sett.NameTable.Replace("|", "")}.png";
 
             EncoderParameters myEncoderParameters = new EncoderParameters(1);
             System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
@@ -817,6 +799,88 @@ namespace StandingsGen
 
             bitmap.Save(file, pngEncoder, myEncoderParameters);
             Console.WriteLine("Сохранил!\n");
+        }
+
+        private static string ForWho()
+        {
+            foreach (var t in teams)
+            {
+                if (t.name == "2010")
+                    return "teams//2010.png";
+
+                if (t.name == "маи")
+                    return "teams//маи.png";
+            }
+
+            return "teams//2010.png";
+        }
+
+        private static string CreateIndicStr(string name, int i)
+        {
+            var team = teams[i];
+           
+            if (name == "И")
+            {
+                return team.games.ToString();
+            }
+            if (name == "В")
+            {
+                return team.wins.ToString();
+            }
+            if (name == "ВО")
+            {
+                return team.winsOT.ToString();
+            }
+            if (name == "ВБ")
+            {
+                return team.winsPen.ToString();
+            }
+            if (name == "ПБ")
+            {
+                return team.losePen.ToString();
+            }
+            if (name == "ПО")
+            {
+                return team.loseOT.ToString();
+            }
+            if (name == "П")
+            {
+                return team.loses.ToString();
+            }
+            if (name == "Ш")
+            {
+                return $"{team.goalsFor}-{team.goalsAgainst}";
+            }
+            if (name == "ГЗ")
+            {
+                return team.goalsFor.ToString();
+            }
+            if (name == "ГП")
+            {
+                return team.goalsAgainst.ToString();
+            }
+            if (name == "Р")
+            {
+                return (team.goalsFor - team.goalsAgainst).ToString();
+            }
+            if (name == "О")
+            {
+                return team.points.ToString();
+            }
+
+            return "";
+        }
+
+        private static int CalcIndicWidth()
+        {
+            int width = 0;
+
+            foreach (var el in sett.ListIndicators)
+            {
+                width += el.Widht;
+            }
+
+            return width;
         }
 
         //private static int CalcReglamentSett(int ind, int pd)

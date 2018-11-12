@@ -69,6 +69,57 @@
             if (inStr == "гуу")
                 return new FullName("ГУУ", "");
 
+            if (inStr == "мгимо")
+                return new FullName("«Дипломаты»", "МГИМО");
+
+            if (inStr == "вшэ")
+                return new FullName("«Чёрные вороны»", "ВШЭ");
+
+            if (inStr == "мгафк")
+                return new FullName("МГАФК", "");
+
+            if (inStr == "мпгу")
+                return new FullName("«Adrenaline»", "МПГУ");
+
+            if (inStr == "мгу")
+                return new FullName("МГУ", "им. Ломоносова");
+
+            if (inStr == "ргунг")
+                return new FullName("«GasOilers»", "РГУНГ");
+
+            if (inStr == "мгюа")
+                return new FullName("«Легион»", "МГЮА");
+
+            if (inStr == "мади")
+                return new FullName("«MADI Motors»", "МАДИ");
+
+            if (inStr == "мэи")
+                return new FullName("«Джокеры»", "МЭИ");
+
+            if (inStr == "мгсу")
+                return new FullName("«МГСУ»", "");
+
+            if (inStr == "мфти")
+                return new FullName("«Физтех»", "МФТИ");
+
+            if (inStr == "тиу")
+                return new FullName("ТИУ", "");
+
+            if (inStr == "югу")
+                return new FullName("ЮГУ", "");
+
+            if (inStr == "уггу")
+                return new FullName("УГГУ", "");
+
+            if (inStr == "сфу")
+                return new FullName("СФУ", "");
+
+            if (inStr == "чгифк")
+                return new FullName("«Физрук»", "ЧГИФК");
+
+            if (inStr == "нгау")
+                return new FullName("«Урожай»", "НГАУ");
+
             return null;
         }
     }
