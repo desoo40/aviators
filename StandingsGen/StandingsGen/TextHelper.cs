@@ -28,7 +28,7 @@
                 return new FullName("«Политехник»", "ЮУрГУ");
 
             if (inStr == "мсха")
-                return new FullName("«Тим. Зубры»", "РГАУ-МСХА");
+                return new FullName("«Тим. зубры»", "РГАУ-МСХА");
 
             if (inStr == "ранхигс")
                 return new FullName("«Сенатор»", "РАНХиГС");
@@ -37,16 +37,16 @@
                 return new FullName("«Скор. машина»", "РУТ (МИИТ)");
 
             if (inStr == "мисис")
-                return new FullName("«Стал. медведи»", "МИСиС");
+                return new FullName("«Стальные медведи»", "МИСиС");
 
             if (inStr == "мифи")
                 return new FullName("«Реактор»", "МИФИ");
 
             if (inStr == "лв")
-                return new FullName("«Лед. волки»", "МАИ");
+                return new FullName("«Ледяные волки»", "МАИ");
 
             if (inStr == "мчс")
-                return new FullName("«Огн. медведи»", "МЧС");
+                return new FullName("«Огненные медведи»", "МЧС");
 
             if (inStr == "фу")
                 return new FullName("Финансовый", "Университет");

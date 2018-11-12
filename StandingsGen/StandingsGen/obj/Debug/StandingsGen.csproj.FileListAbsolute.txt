@@ -99,3 +99,9 @@ E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Ligas\товар�
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Ligas\товарищеские_logo.jpg
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Ligas\товарищеские_logo.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\nologo.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\МСХЛБ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\МСХЛА2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\2010.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\лв.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\Мади.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\мгюаold.png
