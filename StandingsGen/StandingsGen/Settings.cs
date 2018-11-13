@@ -16,6 +16,7 @@ namespace StandingsGen
         public string NameLiga = "";
         public string NameTable= "";
 
+        public bool PartLogo = false;
         public bool PartNames = false;
         public bool PartScores = false;
         public bool PartG = false;
@@ -62,6 +63,9 @@ namespace StandingsGen
 
                 if (lines[i].ToLower() == "tablename")
                     NameTable = lines[++i];
+
+                if (lines[i].ToLower() == "logo" && lines[++i] == "+")
+                    PartLogo = true;
 
                 if (lines[i].ToLower() == "names" && lines[++i] == "+")
                     PartNames = true;
