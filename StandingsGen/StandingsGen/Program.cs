@@ -758,7 +758,7 @@ namespace StandingsGen
 
                                 for (int k = 0; sum < workList.Count; ++k)
                                 {
-                                    for (int l = 0; l < 2; l++)
+                                    for (int l = 0; l < 2 && sum < workList.Count; l++)
                                     {
                                         var workGame = workList[sum];
 
