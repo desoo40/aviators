@@ -80,7 +80,6 @@ E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\бифк.pn
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\вгту.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\МСХЛ2018
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\НХЛ2018
-E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\СХЛ2018
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\ТХЛ2018
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Images\#borntofly.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Ligas\eurochallenge_logo.png
@@ -99,3 +98,17 @@ E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Ligas\товар�
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Ligas\товарищеские_logo.jpg
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Ligas\товарищеские_logo.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\nologo.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\МСХЛБ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\МСХЛА2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\2010.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\лв.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\Мади.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\мгюаold.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\СХЛЗ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\СХЛВ2018
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\мгюаn.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\НГАУ.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\сфу.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\тиу.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\чгифк.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\югу.png
