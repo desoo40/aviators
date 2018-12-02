@@ -48,6 +48,10 @@ namespace StandingsGen
             file = "tournaments//СХЛВ2018";
             Presets(file);
             DrawingTable();
+
+            //file = "tournaments//НХЛ2018";
+            //Presets(file);
+            //DrawingTable();
         }
 
         private static void Presets(string file)
@@ -806,7 +810,7 @@ namespace StandingsGen
                                                 yOt + i * heightTableRow + yAddFour,
                                                 widthOt, heightOt);
 
-                                            g.DrawRectangle(new Pen(Color.Red), rectOt);
+                                            //g.DrawRectangle(new Pen(Color.Red), rectOt);
                                             var strPorOt = workGame.IsOt == 1 ? "ОТ" : "Б";
                                             g.DrawString(strPorOt, fontOtPen, brushBlue, rectOt, fmt.leftFormat);
                                         }
@@ -1099,7 +1103,27 @@ namespace StandingsGen
             var tmpList = (from m in teams
                        orderby -m.points, -m.diff, m.games
                        select m).ToList();
+
+            //var reglamentSort = false;
+
+            //while (!reglamentSort)
+
+            //tmpList = SwapListItems(tmpList, 2,3);
+
             teams = tmpList;
+
+        }
+
+        private static List<Team> SwapListItems(List<Team> l, int v1, int v2)
+        {
+            if (v1 > l.Count - 1 || v2 > l.Count - 1)
+                return l;
+
+            var tmpEl = l[v1];
+            l[v1] = l[v2];
+            l[v2] = tmpEl;
+
+            return l;
         }
 
         #region Parsing
