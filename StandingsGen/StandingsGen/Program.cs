@@ -29,25 +29,29 @@ namespace StandingsGen
 
         static void Main(string[] args)
         {
-            var file = "tournaments//МСХЛ2018";
+            var file = "tournaments//НХЛ2017";
             Presets(file);
             DrawingTable();
 
-            file = "tournaments//МСХЛА2018";
-            Presets(file);
-            DrawingTable();
+            //var file = "tournaments//МСХЛ2018";
+            //Presets(file);
+            //DrawingTable();
 
-            file = "tournaments//МСХЛБ2018";
-            Presets(file);
-            DrawingTable();
+            //file = "tournaments//МСХЛА2018";
+            //Presets(file);
+            //DrawingTable();
 
-            file = "tournaments//СХЛЗ2018";
-            Presets(file);
-            DrawingTable();
+            //file = "tournaments//МСХЛБ2018";
+            //Presets(file);
+            //DrawingTable();
 
-            file = "tournaments//СХЛВ2018";
-            Presets(file);
-            DrawingTable();
+            //file = "tournaments//СХЛЗ2018";
+            //Presets(file);
+            //DrawingTable();
+
+            //file = "tournaments//СХЛВ2018";
+            //Presets(file);
+            //DrawingTable();
         }
 
         private static void Presets(string file)
@@ -794,9 +798,9 @@ namespace StandingsGen
 
                                         if (workGame.IsOt > 0)
                                         {
-                                            var marginSideOt = widthScore / 10;
+                                            var marginSideOt = widthScore / 9;
                                             var xOt = xScore + widthScore / 2 - marginSideOt;
-                                            var yOt = yScore + heightStrScore * 3 / 4;
+                                            var yOt = yScore + heightStrScore * 3 / 4 - 2;
                                             var widthOt = widthScore / 4;
                                             var heightOt = heightStrScore / 2;
 
@@ -806,7 +810,7 @@ namespace StandingsGen
                                                 yOt + i * heightTableRow + yAddFour,
                                                 widthOt, heightOt);
 
-                                            g.DrawRectangle(new Pen(Color.Red), rectOt);
+                                            //g.DrawRectangle(new Pen(Color.Red), rectOt);
                                             var strPorOt = workGame.IsOt == 1 ? "ОТ" : "Б";
                                             g.DrawString(strPorOt, fontOtPen, brushBlue, rectOt, fmt.leftFormat);
                                         }
@@ -937,7 +941,7 @@ namespace StandingsGen
             {
                 return team.goalsAgainst.ToString();
             }
-            if (name == "Р")
+            if (name == "+/-")
             {
                 return (team.goalsFor - team.goalsAgainst).ToString();
             }

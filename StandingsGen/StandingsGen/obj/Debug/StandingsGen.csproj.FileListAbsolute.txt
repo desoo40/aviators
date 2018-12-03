@@ -112,3 +112,4 @@ E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\сфу.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\тиу.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\чгифк.png
 E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Teams\югу.png
+E:\Проги\git\aviators\StandingsGen\StandingsGen\bin\Debug\Tournaments\НХЛ2017
