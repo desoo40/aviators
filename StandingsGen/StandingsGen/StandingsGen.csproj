@@ -118,6 +118,9 @@
     <None Include="Tournaments\МСХЛА2018">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Tournaments\НХЛ2017">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Tournaments\НХЛ2018">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

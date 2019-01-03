@@ -29,27 +29,27 @@ namespace StandingsGen
 
         static void Main(string[] args)
         {
-            var file = "tournaments//МСХЛ2018";
+            var file = "tournaments//НХЛ2017";
             Presets(file);
             DrawingTable();
 
-            file = "tournaments//МСХЛА2018";
-            Presets(file);
-            DrawingTable();
+            //var file = "tournaments//МСХЛ2018";
+            //Presets(file);
+            //DrawingTable();
 
-            file = "tournaments//МСХЛБ2018";
-            Presets(file);
-            DrawingTable();
+            //file = "tournaments//МСХЛА2018";
+            //Presets(file);
+            //DrawingTable();
 
-            file = "tournaments//СХЛЗ2018";
-            Presets(file);
-            DrawingTable();
+            //file = "tournaments//МСХЛБ2018";
+            //Presets(file);
+            //DrawingTable();
 
-            file = "tournaments//СХЛВ2018";
-            Presets(file);
-            DrawingTable();
+            //file = "tournaments//СХЛЗ2018";
+            //Presets(file);
+            //DrawingTable();
 
-            //file = "tournaments//НХЛ2018";
+            //file = "tournaments//СХЛВ2018";
             //Presets(file);
             //DrawingTable();
         }
@@ -798,9 +798,9 @@ namespace StandingsGen
 
                                         if (workGame.IsOt > 0)
                                         {
-                                            var marginSideOt = widthScore / 10;
+                                            var marginSideOt = widthScore / 9;
                                             var xOt = xScore + widthScore / 2 - marginSideOt;
-                                            var yOt = yScore + heightStrScore * 3 / 4;
+                                            var yOt = yScore + heightStrScore * 3 / 4 - 2;
                                             var widthOt = widthScore / 4;
                                             var heightOt = heightStrScore / 2;
 
@@ -941,7 +941,7 @@ namespace StandingsGen
             {
                 return team.goalsAgainst.ToString();
             }
-            if (name == "Р")
+            if (name == "+/-")
             {
                 return (team.goalsFor - team.goalsAgainst).ToString();
             }
@@ -1103,27 +1103,7 @@ namespace StandingsGen
             var tmpList = (from m in teams
                        orderby -m.points, -m.diff, m.games
                        select m).ToList();
-
-            //var reglamentSort = false;
-
-            //while (!reglamentSort)
-
-            //tmpList = SwapListItems(tmpList, 2,3);
-
             teams = tmpList;
-
-        }
-
-        private static List<Team> SwapListItems(List<Team> l, int v1, int v2)
-        {
-            if (v1 > l.Count - 1 || v2 > l.Count - 1)
-                return l;
-
-            var tmpEl = l[v1];
-            l[v1] = l[v2];
-            l[v2] = tmpEl;
-
-            return l;
         }
 
         #region Parsing

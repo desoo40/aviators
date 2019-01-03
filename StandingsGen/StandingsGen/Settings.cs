@@ -147,7 +147,7 @@ namespace StandingsGen
                 {
                     PartDiffPM = true;
                     ++truesCnt;
-                    ListIndicators.Add(new Indicator("Р", widhtStandartIndic));
+                    ListIndicators.Add(new Indicator("+/-", 120));
                 }
 
                 if (lines[i].ToLower() == "p" && lines[++i] == "+")
