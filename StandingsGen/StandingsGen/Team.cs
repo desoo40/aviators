@@ -16,7 +16,7 @@
         public int goalsAgainst = 0;
         public int diff => goalsFor - goalsAgainst;
 
-
+        //fucking comment
 
         public Team(string s)
         {
