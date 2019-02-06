@@ -29,29 +29,29 @@ namespace StandingsGen
 
         static void Main(string[] args)
         {
-            var file = "tournaments//НХЛ2017";
+            //var file = "tournaments//СХЛЗ2018";
+            //Presets(file);
+            //DrawingTable();
+
+            var file = "tournaments//МСХЛ2018";
             Presets(file);
             DrawingTable();
 
-            //var file = "tournaments//МСХЛ2018";
-            //Presets(file);
-            //DrawingTable();
+            file = "tournaments//МСХЛА2018";
+            Presets(file);
+            DrawingTable();
 
-            //file = "tournaments//МСХЛА2018";
-            //Presets(file);
-            //DrawingTable();
+            file = "tournaments//МСХЛБ2018";
+            Presets(file);
+            DrawingTable();
 
-            //file = "tournaments//МСХЛБ2018";
-            //Presets(file);
-            //DrawingTable();
+            file = "tournaments//СХЛЗ2018";
+            Presets(file);
+            DrawingTable();
 
-            //file = "tournaments//СХЛЗ2018";
-            //Presets(file);
-            //DrawingTable();
-
-            //file = "tournaments//СХЛВ2018";
-            //Presets(file);
-            //DrawingTable();
+            file = "tournaments//СХЛВ2018";
+            Presets(file);
+            DrawingTable();
         }
 
         private static void Presets(string file)
@@ -1101,9 +1101,175 @@ namespace StandingsGen
         private static void SortStandings()
         {
             var tmpList = (from m in teams
-                       orderby -m.points, -m.diff, m.games
-                       select m).ToList();
+                orderby -m.points, -m.diff, m.games
+                select m).ToList();
             teams = tmpList;
+
+            ReglamentSort();
+        }
+
+        private static void ReglamentSort()
+        {
+            var reglamDone = false;
+
+
+            while (!reglamDone)
+            {
+                var tableWithoutEqualsPoints = true;
+
+                for (int i = 0; i < teams.Count - 1; i++)
+                {
+                    if (teams[i].points == teams[i + 1].points)
+                    {
+                        tableWithoutEqualsPoints = false;
+                        reglamDone = CheckAllReglamentRulesSHL(i);
+                    }
+                }
+
+                if(tableWithoutEqualsPoints)
+                    break;
+            }
+            
+        }
+
+        private static bool CheckAllReglamentRulesSHL(int i)
+        {
+            var indUpper = DictIndTeamByName[teams[i].name];
+            var indLower = DictIndTeamByName[teams[i+1].name];
+
+            var upperPoints = 0;
+            var lowerPoints = 0;
+
+            var upperGoals = 0;
+            var lowerGoals = 0;
+
+            var workList = games[indUpper][indLower];
+
+            foreach (var el in workList)
+            {
+                upperGoals += el.HomeTeamGoals;
+                lowerGoals += el.AwayTeamGoals;
+                
+                if (el.HomeTeamGoals > el.AwayTeamGoals)
+                {
+                    if (el.IsOt > 0)
+                    {
+                        upperPoints += sett.PointsPerWinOt;
+                        lowerPoints += sett.PointsPerLoseOt;
+                    }
+
+                    upperPoints += sett.PointsPerWin;
+                }
+
+                else if (el.HomeTeamGoals == el.AwayTeamGoals)
+                {
+                    upperPoints += sett.PointsPerDraw;
+                    lowerGoals += sett.PointsPerDraw;
+                }
+
+                else if (el.HomeTeamGoals < el.AwayTeamGoals)
+                {
+                    if (el.IsOt > 0)
+                    {
+                        lowerPoints += sett.PointsPerWinOt;
+                        upperPoints += sett.PointsPerLoseOt;
+                    }
+
+                    lowerPoints += sett.PointsPerWin;
+                }
+            }
+
+            if (upperPoints != lowerPoints)
+            {
+                if (upperPoints < lowerPoints)
+                {
+                    SwapListItems(teams, i, i + 1);
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (upperGoals != lowerGoals)
+            {
+                if (upperGoals < lowerGoals)
+                {
+                    SwapListItems(teams, i, i + 1);
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (teams[i].wins != teams[i + 1].wins)
+            {
+                if (teams[i].wins < teams[i + 1].wins)
+                {
+                    SwapListItems(teams, i, i + 1);
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (teams[i].winsOT != teams[i + 1].winsOT)
+            {
+                if (teams[i].winsOT < teams[i + 1].winsOT)
+                {
+                    SwapListItems(teams, i, i + 1);
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (teams[i].winsPen != teams[i + 1].winsPen)
+            {
+                if (teams[i].winsPen < teams[i + 1].winsPen)
+                {
+                    SwapListItems(teams, i, i + 1);
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (teams[i].diff != teams[i + 1].diff)
+            {
+                if (teams[i].diff < teams[i + 1].diff)
+                {
+                    SwapListItems(teams, i, i + 1);
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (teams[i].goalsFor != teams[i + 1].goalsFor)
+            {
+                if (teams[i].goalsFor < teams[i + 1].goalsFor)
+                {
+                    SwapListItems(teams, i, i + 1);
+                    return false;
+                }
+
+                return true;
+            }
+
+            //жребий?
+            return true;
+        }
+
+        private static List<Team> SwapListItems(List<Team> l, int v1, int v2)
+        {
+            if (v1 > l.Count - 1 || v2 > l.Count - 1)
+                return l;
+
+            var tmpEl = l[v1];
+            l[v1] = l[v2];
+            l[v2] = tmpEl;
+
+            return l;
         }
 
         #region Parsing
@@ -1202,7 +1368,7 @@ namespace StandingsGen
 
         private static void LoseUpd(string awayTeamName, int awayTeamGoals, int homeTeamGoals, int otOrPen)
         {
-            var team = teams.Find(x => x.name.Contains(awayTeamName));
+            var team = teams.Find(x => x.name.Equals(awayTeamName));
 
             if (team == null)
             {
@@ -1237,7 +1403,7 @@ namespace StandingsGen
 
         private static void WinsUpd(string homeTeamName, int homeTeamGoals, int awayTeamGoals, int otOrPen)
         {
-            var team = teams.Find(x => x.name.Contains(homeTeamName));
+            var team = teams.Find(x => x.name.Equals(homeTeamName));
 
             if (team == null)
             {

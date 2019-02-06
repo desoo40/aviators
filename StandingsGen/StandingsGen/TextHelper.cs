@@ -34,7 +34,7 @@
                 return new FullName("«Сенатор»", "РАНХиГС");
 
             if (inStr == "миит")
-                return new FullName("«Скор. машина»", "РУТ (МИИТ)");
+                return new FullName("«Скоростная машина»", "РУТ (МИИТ)");
 
             if (inStr == "мисис")
                 return new FullName("«Стальные медведи»", "МИСиС");
