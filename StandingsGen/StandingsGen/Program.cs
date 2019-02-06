@@ -29,7 +29,15 @@ namespace StandingsGen
 
         static void Main(string[] args)
         {
+<<<<<<< HEAD
             //var file = "tournaments//СХЛЗ2018";
+=======
+            var file = "tournaments//РБилл2019";
+            Presets(file);
+            DrawingTable();
+
+            //file = "tournaments//МСХЛ2018";
+>>>>>>> 6cab6d5484dc1925a07f2534c8961d1f197ff603
             //Presets(file);
             //DrawingTable();
 
